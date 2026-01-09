@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цирковая Новелла</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+            cursor: default;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Анимация появления из черного */
+        #fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            animation: fadeIn 3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* Улучшенные эффекты для текста */
+        .glitch-text {
+            color: #ff0000 !important;
+            text-shadow: 
+                0 0 5px #ff0000,
+                0 0 10px #cc0000,
+                0 0 15px #990000,
+                0 0 20px #660000,
+                0 0 25px #330000 !important;
+            animation: glitch 0.2s infinite alternate,
+                       shake 0.15s infinite alternate,
+                       bloodPulse 2s infinite;
+            position: relative;
+            filter: blur(0.3px);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes glitch {
+            0%, 100% {
+                transform: translate(0);
+            }
+            20% {
+                transform: translate(-2px, 2px);
+            }
+            40% {
+                transform: translate(-2px, -2px);
+            }
+            60% {
+                transform: translate(2px, 2px);
+            }
+            80% {
+                transform: translate(2px, -2px);
+            }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            50% { transform: translateX(1px); }
+            75% { transform: translateX(-0.5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes bloodPulse {
+            0%, 100% { 
+                opacity: 0.9;
+                text-shadow: 
+                    0 0 5px #ff0000,
+                    0 0 10px #cc0000,
+                    0 0 15px #990000;
+            }
+            50% { 
+                opacity: 1;
+                text-shadow: 
+                    0 0 10px #ff0000,
+                    0 0 20px #cc0000,
+                    0 0 30px #990000;
+            }
+        }
+
+        .blood-text {
+            color: #ff3333 !important;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 30px #ff0000 !important;
+            animation: bloodDrip 3s infinite,
+                       pulseRed 1.5s infinite alternate;
+            position: relative;
+        }
+
+        @keyframes bloodDrip {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+        }
+
+        @keyframes pulseRed {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .distorted-text {
+            color: #ff6666 !important;
+            text-shadow: 
+                0 0 15px #ff0000,
+                0 0 25px #ff0000 !important;
+            animation: distort 0.5s infinite alternate,
+                       lag 2s infinite;
+            filter: blur(0.8px) contrast(1.5);
+        }
+
+        @keyframes distort {
+            0% { 
+                transform: scale(1);
+                letter-spacing: normal;
+            }
+            100% { 
+                transform: scale(1.02);
+                letter-spacing: 1px;
+            }
+        }
+
+        @keyframes lag {
+            0%, 100% { opacity: 1; }
+            10%, 30%, 50%, 70%, 90% { opacity: 0.9; }
+            20%, 40%, 60%, 80% { opacity: 1; }
+        }
+
+        /* Контейнер сцены */
+        .scene-container {
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1.2s ease;
+            position: relative;
+        }
+
+        /* Имя персонажа слева над диалоговым окном */
+        .character-name {
+            position: absolute;
+            bottom: calc(25vh + 60px);
+            left: 60px;
+            color: #ffcccc;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(200, 100, 120, 0.5);
+            text-align: left;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: rgba(40, 0, 10, 0.7);
+            z-index: 150;
+            max-width: 400px;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Картинка персонажа прикована к нижней части справа */
+        .character-portrait {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            background-color: #1a000a;
+            box-shadow: 0 0 20px rgba(80, 0, 20, 0.5);
+            z-index: 150;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Диалоговое окно */
+        .dialog-container {
+            position: absolute;
+            bottom: 40px;
+            left: 60px;
+            width: calc(100% - 320px);
+            height: 25vh;
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            border: 1px solid rgba(120, 0, 40, 0.8);
+            box-shadow: 
+                0 0 30px rgba(120, 0, 40, 0.5),
+                inset 0 0 20px rgba(80, 0, 20, 0.3);
+            z-index: 100;
+            display: flex;
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            transition: all 0.5s ease;
+        }
+
+        .dialog-container.fullscreen {
+            bottom: 40px;
+            left: 50px;
+            width: 90%;
+            height: 25vh;
+            border-radius: 10px;
+            border: 1px solid rgba(120, 0, 40, 0.8);
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            backdrop-filter: blur(5px);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dialog-container.fullscreen .dialog-text.narrator {
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+
+        /* Правая часть с текстом */
+        .dialog-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Стиль текста для обычных реплик */
+        .dialog-text {
+            color: #ffffff;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            min-height: 100px;
+            padding: 15px;
+            border-radius: 5px;
+            background: rgba(30, 0, 10, 0.4);
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        /* Стиль текста для авторских реплик */
+        .dialog-text.narrator {
+            font-size: 1.8rem;
+            line-height: 1.8;
+            text-align: center;
+            padding: 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #ffd9e3;
+            text-shadow: 0 0 10px rgba(255, 200, 220, 0.3);
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+
+        .continue-indicator {
+            text-align: center;
+            color: #ffb3c1;
+            font-size: 1.1rem;
+            font-style: italic;
+            text-shadow: 0 0 5px rgba(200, 100, 120, 0.3);
+            animation: pulse 1.5s infinite alternate;
+            padding: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Финальный экран с выбором */
+        .final-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: 200;
+        }
+
+        /* Все кнопки - вертикально по центру экрана */
+        .choice-buttons {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+            z-index: 201;
+        }
+
+        /* Стили кнопок выбора */
+        .circus-button {
+            background: linear-gradient(145deg, 
+                rgba(100, 0, 30, 0.7), 
+                rgba(60, 0, 15, 0.7));
+            border: 1px solid #800040;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 300px;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 
+                0 0 15px rgba(100, 0, 30, 0.4),
+                inset 0 0 10px rgba(60, 0, 15, 0.3);
+        }
+
+        .circus-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.7s;
+        }
+
+        .circus-button:hover {
+            transform: translateY(-2px);
+            border-color: #a00050;
+            box-shadow: 
+                0 0 20px rgba(120, 0, 50, 0.6),
+                inset 0 0 15px rgba(80, 0, 25, 0.4);
+            background: linear-gradient(145deg, 
+                rgba(120, 0, 40, 0.8), 
+                rgba(80, 0, 20, 0.8));
+        }
+
+        .circus-button:hover::before {
+            left: 100%;
+        }
+
+        /* Кнопка "Идти внутрь" - ИЗМЕНЕНИЕ: центрирование */
+        .enter-button {
+            position: fixed; /* Изменено на fixed */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, 
+                rgba(100, 0, 30, 0.8), 
+                rgba(60, 0, 15, 0.8));
+            border: 1px solid #800040;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 15px 50px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 
+                0 0 15px rgba(100, 0, 30, 0.4),
+                inset 0 0 10px rgba(60, 0, 15, 0.3);
+            z-index: 300; /* Увеличено для поверх всего */
+            display: none;
+            opacity: 0;
+            animation: fadeInButton 0.8s ease forwards;
+        }
+
+        @keyframes fadeInButton {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .enter-button:hover {
+            transform: translate(-50%, -50%) translateY(-2px);
+            border-color: #a00050;
+            box-shadow: 
+                0 0 20px rgba(120, 0, 50, 0.6),
+                inset 0 0 15px rgba(80, 0, 25, 0.4);
+        }
+
+        /* Экран с билетом */
+        .ticket-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .ticket-image {
+            max-width: 60%;
+            max-height: 60%;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 60px rgba(180, 140, 0, 0.6),
+                0 0 30px rgba(150, 100, 0, 0.4),
+                0 0 15px rgba(120, 80, 0, 0.3);
+            animation: ticketGlow 2s infinite alternate;
+        }
+
+        @keyframes ticketGlow {
+            0% {
+                box-shadow: 
+                    0 0 50px rgba(180, 140, 0, 0.5),
+                    0 0 25px rgba(150, 100, 0, 0.3),
+                    0 0 10px rgba(120, 80, 0, 0.2);
+            }
+            100% {
+                box-shadow: 
+                    0 0 80px rgba(180, 140, 0, 0.8),
+                    0 0 40px rgba(150, 100, 0, 0.6),
+                    0 0 20px rgba(120, 80, 0, 0.4);
+            }
+        }
+
+        /* Переход между сценами */
+        .scene-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 10000;
+            transition: opacity 1s ease;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .dialog-container:not(.fullscreen) {
+                width: calc(100% - 280px);
+            }
+            
+            .character-portrait {
+                width: 180px;
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .character-name {
+                left: 20px;
+                bottom: calc(30vh + 60px);
+                font-size: 1.5rem;
+                max-width: 300px;
+            }
+            
+            .character-portrait {
+                width: 150px;
+                height: 150px;
+                right: 20px;
+                bottom: 30px;
+            }
+            
+            .dialog-container:not(.fullscreen) {
+                left: 20px;
+                width: calc(100% - 190px);
+                height: 30vh;
+                padding: 15px;
+            }
+            
+            .dialog-text {
+                font-size: 1.2rem;
+                padding: 10px;
+            }
+            
+            .dialog-text.narrator {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            .continue-indicator {
+                font-size: 1rem;
+            }
+            
+            .circus-button {
+                width: 250px;
+                padding: 12px 30px;
+                font-size: 1.2rem;
+            }
+            
+            .enter-button {
+                font-size: 1.2rem;
+                padding: 12px 30px;
+            }
+            
+            .ticket-image {
+                max-width: 80%;
+                max-height: 80%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .character-name {
+                font-size: 1.2rem;
+                padding: 8px 15px;
+                max-width: 250px;
+            }
+            
+            .character-portrait {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .dialog-container:not(.fullscreen) {
+                height: 35vh;
+                padding: 12px;
+                width: calc(100% - 150px);
+            }
+            
+            .dialog-text {
+                font-size: 1rem;
+            }
+            
+            .dialog-text.narrator {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+            
+            .continue-indicator {
+                font-size: 0.9rem;
+            }
+            
+            .circus-button {
+                width: 220px;
+                font-size: 1.1rem;
+                padding: 10px 25px;
+            }
+            
+            .enter-button {
+                font-size: 1.1rem;
+                padding: 10px 30px;
+            }
+            
+            .ticket-image {
+                max-width: 90%;
+                max-height: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Начальное затемнение -->
+    <div id="fade-overlay"></div>
+    
+    <!-- Контейнер сцены -->
+    <div class="scene-container" id="scene-container">
+        <!-- Имя персонажа слева -->
+        <div id="character-name" class="character-name"></div>
+        
+        <!-- Картинка персонажа справа внизу -->
+        <img id="character-portrait" class="character-portrait" src="" alt="Персонаж">
+        
+        <!-- Диалоговое окно -->
+        <div class="dialog-container" id="dialog-container">
+            <div class="dialog-panel">
+                <div id="dialog-text" class="dialog-text"></div>
+                <div class="continue-indicator">Нажмите ПРОБЕЛ для продолжения...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка "Идти внутрь" - ИЗМЕНЕНИЕ: вынесена из контейнера -->
+    <button class="enter-button" id="enter-button" onclick="enterCircus()">Идти внутрь</button>
+
+    <!-- Финальный экран с выбором -->
+    <div class="final-screen" id="final-screen" style="background-image: url('arts/CircusOut.jpeg');">
+        <div class="choice-buttons">
+            <button class="circus-button" onclick="chooseCircus()">Отправиться в цирк</button>
+            <button class="circus-button" onclick="goHome()">Пойти домой</button>
+        </div>
+    </div>
+
+    <!-- Экран с билетом -->
+    <div class="ticket-screen" id="ticket-screen">
+        <img src="arts/Ticket.png" alt="Билет" class="ticket-image">
+    </div>
+
+    <!-- Переход между сценами -->
+    <div class="scene-transition" id="scene-transition"></div>
+
+    <!-- Аудио для фоновой музыки -->
+    <audio id="background-music" loop preload="auto">
+        <source src="music/Do Your Choice.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+
+    <script>
+        // Данные новеллы - переработанные диалоги
+        const initialScenes = [
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Я спрошу тебя прямо, дорогой зритель: любишь ли ты цирк?..",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Это буйство красок, этот резкий запах попкорна, смешанный с ароматом животных и страха? Этот перезвон бубенцов, предвещающий нечто невообразимое?..",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "А клоуны? Ох, как же я обожаю их. Это же просто прелесть, не правда ли?",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Ты любишь их?..",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Их улыбки, растянутые до самых ушей? Эти горы разноцветных кудрей и нос-пуговку, который так и хочется сорвать?",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Их шарики, что так забавно скрипят, когда из них делают зверушек?..",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Скрипят, как шеи тех идиотов, что смели смеяться над клоунами...",
+                isNarrator: true,
+                effect: 'glitch'
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Ох...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Прости, кажется, я отвлёкся?.. Так... На чём я остановился?..",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Ах да! Цирк!",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Не спорь со мной. Ты ведь любишь его. Все любят...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Пока не заглянут за кулисы...",
+                isNarrator: true,
+                effect: 'glitch'
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Но я не буду торопить события. Каждая хорошая сказка, даже самая мрачная, начинается с приглашения.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "И я приглашаю тебя, мой дорогой зритель, пройти со мной в эту прекрасную и жуткую историю.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Историю о цирке, который пришёл не для того, чтобы дарить радость. О шатре, распахнувшем свои объятия не для смеха.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "И о людях, вошедших под его полосатый свод как зрители, но ставших главными актёрами в представлении...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Представлении, у которого нет конца...",
+                isNarrator: true,
+                effect: 'glitch'
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Интересно?",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "Не спеши. Я расскажу всё по порядку...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Static.gif')",
+                characterImage: "",
+                characterName: "",
+                text: "А начну с того, что...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Экран ноутбука пылал белизной браузера, освещая моё усталое лицо. Палец с раздражением скроллил вниз.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "«Фейк», «Постановка», «Скукотища»... Чёртовы идиоты! Вы хоть знаете, сколько сил я трачу?!",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Да кого я обманываю? Это дерьмо. Полное дерьмо...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Я бы продал душу за один удачный кадр...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Я всегда увлекался страшилками. С возрастом это переросло в навязчивую идею.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Фотограф-документалист, создающий статьи о городских легендах. Жалкий, неудачливый мечтатель...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Ни одна статья не принесла мне славы. Только насмешки в комментариях...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Взбешённый, я натянул кофту поверх футболки, джинсы, кроссовки и выскочил на улицу, желая хоть немного взбодриться.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Город дышал прохладой и влагой после дождя. Фонари рисовали на асфальте дрожащие тени.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Я шёл без цели, пока ноги сами не привели меня туда, где висела та самая афиша.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "Высокая кирпичная стена, разрисованная граффити. А посередине - она.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Что за...?",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "В центре, в ореоле кривого света, стоял фигурный шут в раздвоенном колпаке. Лица скрывала белая маска с одной длинной, тонюсенькой улыбкой.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "Над головой горели слова: «The House of Silent Wonders». Цирк Уродов.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "А?.. Звучит интересно...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "Внизу мелким шрифтом: «Всего 7 дней. Тайна. Восторг. Преображение». И адрес — пустырь у старой реки.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "Мои руки уже дрожали от возбуждения. Я достал телефон и сделал снимок афиши.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/plakat.png')",
+                characterImage: "",
+                characterName: "",
+                text: "Идея вечерней прогулки внезапно обрела смысл. Я развернулся и почти бегом помчался домой.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Швырнув сумку в угол, я вытащил телефон и дрожащими пальцами набрал номер.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Раздались несколько гудков, затем, послышался сонный, чуть насмешливый голос.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Алё? Опять забыл, как дойти до дома?",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Очень смешно. Слушай, извини за время. Я нашёл одну афишу. «The House of Silent Wonders». Не слышал?",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Сходим завтра? Развеяться.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "На другом конце воцарилась тишина. Голос стал тише, без намёка на шутку.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Погоди... Что ты сказал?",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Цирк... Там что-то про...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Забудь. Немедленно забудь.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Это не цирк... Вернее, он, но... В общем, эта группа приезжает в город всего раз в год. Никто не знает когда.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Появляется на пустыре ровно на семь дней.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "А затем, исчезает, словно и не было их никогда...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Ну и что? Гастроли. Мрачный антураж для привлечения публики.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Не тут-то было... Сначала к ним ходили тучи народа. Но ни один не вернулся...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Так что даже не думай туда соваться, понял?",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Сердце ёкнуло. Но не от страха. От щемящего, запретного возбуждения... Я уже не слушал Сашу...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/telephone.png",
+                characterName: "Саша",
+                text: "Ты слышишь меня?! Даже не думай!",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Да... Спокойной...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Я резко сбросил вызов. Глаза горели. Это был мой шанс. Шанс сделать что-то стоящее.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/room.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Чёрт возьми, да! Вот оно!",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                characterImage: "",
+                characterName: "",
+                text: "Я быстро собрал сумку, и через полчаса уже стоял на пустыре. Передо мной возвышался огромный красно-белый шатёр.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                characterImage: "",
+                characterName: "",
+                text: "Но что-то всё равно сжимало сердце...",
+                isNarrator: true,
+                effect: null
+            }
+        ];
+
+        // Данные продолжения после выбора "В цирк"
+        const circusScenes = [
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                characterImage: "",
+                characterName: "",
+                text: "Наконец, собравшись с силами, я шагнул вперёд, направляясь к шатру...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Внутри было мрачновато... Полупустая территория вне шатра пугала меня.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Оглядевшись вокруг, я заметил лавочку с билетами. Проверив кошелёк, я медленно поплёлся туда...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Из темноты на меня глядели два огромных жутких глаза...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Твоя тень гласит тебе жестокую судьбу... Будь смел и честен, если хочешь одолеть верховного жнеца...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Простите... что? Я просто хочу билет на представление.",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Представление... Ха-ха-ха... Какое милое слово для того, что ждёт тебя внутри. Пятьсот. Ровно столько, сколько капель крови засыхает в горле, когда видишь Истинное Лицо...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Я не ответил ничего. Просто молча протянул этому безумцу нужную сумму.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Деньги? Глупый, глупый человек... Ты платишь не бумажками. Ты платишь вниманием...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Мойры уже заправили нити... И стоит тебе на секунду замедлиться, они перетянут твоё горло...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Продавец медленно протянул билет. Его пальцы были не просто бледными — они казались восковыми...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Меня чуть не стошнило от этого зрелища...",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Возьми. Он уже заждался тебя... В зале приготовлено особое место...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            // После этой фразы показываем билет
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/ref.png",
+                characterName: "Вы",
+                text: "Я... я просто фотограф. Мне нужны кадры для статьи. Ничего больше...",
+                isNarrator: false,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Прощай, мой милый друг... Будь осторожен...",
+                isNarrator: false,
+                effect: 'distorted'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Он наклонился ближе. От него пахло старыми книгами, ладаном и чем-то сладковато-гнилостным, как перезревшие фрукты.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "arts/seller.jpg",
+                characterName: "???",
+                text: "Запомни одну вещь, мальчик с фотоаппаратом... Когда на арене смеётся клоун — все остальные плачут...",
+                isNarrator: false,
+                effect: 'glitch'
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Отдав билет мне в руки, старик захлопнул кассу.",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "Простояв ещё с минуту, я нервно поплёлся внутрь, в панике теребя в руках камеру",
+                isNarrator: true,
+                effect: null
+            },
+            {
+                background: "url('arts/Ticketsell.jpg')",
+                characterImage: "",
+                characterName: "",
+                text: "«Просто психанувший старик», — попытался убедить я себя. Но тут же почувствовал чей-то взгляд на спине...",
+                isNarrator: true,
+                effect: null
+            }
+        ];
+
+        // Состояние игры
+        let gameState = {
+            currentPhase: 'initial',
+            currentScene: 0,
+            canAdvance: true,
+            musicPlaying: false,
+            ticketShown: false,
+            showEnterButton: false
+        };
+
+        // Элементы DOM
+        const sceneContainer = document.getElementById('scene-container');
+        const characterPortrait = document.getElementById('character-portrait');
+        const characterName = document.getElementById('character-name');
+        const dialogText = document.getElementById('dialog-text');
+        const dialogContainer = document.getElementById('dialog-container');
+        const finalScreen = document.getElementById('final-screen');
+        const sceneTransition = document.getElementById('scene-transition');
+        const backgroundMusic = document.getElementById('background-music');
+        const ticketScreen = document.getElementById('ticket-screen');
+        const enterButton = document.getElementById('enter-button');
+
+        // Переменные для управления эффектами
+        let letterMutationInterval = null;
+
+        // Инициализация первой сцены
+        function initializeScene() {
+            updateScene();
+            startMusic();
+        }
+
+        // Начать воспроизведение музыки
+        function startMusic() {
+            try {
+                backgroundMusic.volume = 0.6;
+                const playPromise = backgroundMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        gameState.musicPlaying = true;
+                    }).catch(error => {
+                        console.log("Ошибка воспроизведения музыки:", error);
+                    });
+                }
+            } catch (e) {
+                console.log("Ошибка при запуске музыки:", e);
+            }
+        }
+
+        // Обновление сцены
+        function updateScene() {
+            const scenes = getCurrentScenes();
+            const scene = scenes[gameState.currentScene];
+            
+            if (!scene) return;
+            
+            // Если нужно показать кнопку "Идти внутрь", скрываем диалоговое окно
+            if (gameState.showEnterButton) {
+                dialogContainer.style.opacity = '0';
+                characterName.style.opacity = '0';
+                characterPortrait.style.opacity = '0';
+                return;
+            }
+            
+            // Восстанавливаем видимость диалогового окна
+            dialogContainer.style.opacity = '1';
+            
+            sceneContainer.style.backgroundImage = scene.background;
+            
+            if (scene.isNarrator) {
+                characterPortrait.style.opacity = '0';
+                characterName.style.opacity = '0';
+                dialogContainer.classList.add('fullscreen');
+                dialogText.classList.add('narrator');
+                dialogText.classList.remove('normal');
+                
+                applyTextEffect(scene.effect);
+            } else {
+                characterPortrait.src = scene.characterImage;
+                characterPortrait.alt = scene.characterName;
+                characterPortrait.style.opacity = '1';
+                characterName.style.opacity = '1';
+                dialogContainer.classList.remove('fullscreen');
+                dialogText.classList.remove('narrator');
+                dialogText.classList.add('normal');
+                
+                resetTextEffect();
+            }
+            
+            characterName.textContent = scene.characterName;
+            
+            // Применяем мутацию букв для glitch-эффекта
+            if (scene.effect === 'glitch') {
+                dialogText.setAttribute('data-text', scene.text);
+                dialogText.textContent = scene.text;
+                applyLetterMutation(dialogText);
+            } else {
+                dialogText.removeAttribute('data-text');
+                dialogText.textContent = scene.text;
+                stopLetterMutation();
+            }
+            
+            // Специальная логика для показа билета
+            if (gameState.currentPhase === 'circus' && gameState.currentScene === 12) {
+                // Это сцена с фразой "Возьми. Он уже заждался тебя..."
+                // Через короткую задержку показываем билет
+                setTimeout(() => {
+                    showTicket();
+                }, 1000);
+            }
+            
+            // Показываем кнопку входа после завершения всех диалогов цирка
+            if (gameState.currentPhase === 'circus' && gameState.currentScene === scenes.length - 1) {
+                // Устанавливаем задержку перед показом кнопки
+                setTimeout(() => {
+                    showEnterButton();
+                }, 500);
+            }
+        }
+
+        // Показать кнопку "Идти внутрь"
+        function showEnterButton() {
+            gameState.showEnterButton = true;
+            gameState.canAdvance = false;
+            
+            // Плавно скрываем диалоговое окно
+            dialogContainer.style.opacity = '0';
+            characterName.style.opacity = '0';
+            characterPortrait.style.opacity = '0';
+            
+            // Показываем кнопку
+            enterButton.style.display = 'block';
+            
+            // Включаем анимацию появления
+            setTimeout(() => {
+                enterButton.style.opacity = '1';
+            }, 100);
+        }
+
+        // Показать билет
+        function showTicket() {
+            if (gameState.ticketShown) return;
+            
+            gameState.ticketShown = true;
+            gameState.canAdvance = false;
+            
+            fadeOut();
+            
+            setTimeout(() => {
+                ticketScreen.style.display = 'flex';
+                fadeIn();
+                
+                // Через 5 секунд скрываем билет
+                setTimeout(() => {
+                    fadeOut();
+                    setTimeout(() => {
+                        ticketScreen.style.display = 'none';
+                        gameState.canAdvance = true;
+                        fadeIn();
+                        
+                        // Переходим к следующей сцене
+                        nextScene();
+                    }, 2000);
+                }, 5000);
+            }, 2000);
+        }
+
+        // Применить мутацию букв для glitch-эффекта
+        function applyLetterMutation(element) {
+            stopLetterMutation();
+            
+            const replacements = {
+                'а': ['@', 'α', 'ⱥ', 'а'],
+                'А': ['@', '∀', 'А'],
+                'к': ['κ', 'ĸ', 'к', 'x'],
+                'К': ['Ҝ', 'Қ', 'К', 'X'],
+                'е': ['ё', 'е', '€', 'ë'],
+                'Е': ['Ё', 'Е', 'Є'],
+                'о': ['0', 'о', 'ø', 'θ'],
+                'О': ['0', 'О', 'Ø'],
+                'с': ['с', '©', 'ς'],
+                'С': ['С', '©', 'Ϲ'],
+                'р': ['р', 'ρ', 'þ'],
+                'Р': ['Р', 'Ҏ'],
+                'х': ['х', '×', 'х'],
+                'Х': ['Х', 'Ӿ'],
+                'в': ['в', 'β'],
+                'В': ['В', '฿'],
+                'н': ['н', 'η', 'ñ'],
+                'Н': ['Н', 'Ӊ'],
+                'т': ['т', 'τ', '†'],
+                'Т': ['Т', '⊥'],
+                'м': ['м', 'µ'],
+                'М': ['М', 'Ṃ'],
+                ' ': [' ', '_', '.', '·']
+            };
+            
+            letterMutationInterval = setInterval(() => {
+                let text = element.getAttribute('data-text') || element.textContent;
+                let newText = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    if (replacements[char] && Math.random() > 0.7) {
+                        const replacementsList = replacements[char];
+                        newText += replacementsList[Math.floor(Math.random() * replacementsList.length)];
+                    } else {
+                        newText += char;
+                    }
+                }
+                
+                element.textContent = newText;
+                
+                // Рандомное изменение цвета
+                if (Math.random() > 0.5) {
+                    const red = 200 + Math.floor(Math.random() * 55);
+                    const green = Math.floor(Math.random() * 50);
+                    const blue = Math.floor(Math.random() * 50);
+                    element.style.color = `rgb(${red}, ${green}, ${blue})`;
+                }
+                
+            }, 100 + Math.random() * 200);
+        }
+
+        // Остановить мутацию букв
+        function stopLetterMutation() {
+            if (letterMutationInterval) {
+                clearInterval(letterMutationInterval);
+                letterMutationInterval = null;
+            }
+        }
+
+        // Применить эффект к тексту
+        function applyTextEffect(effectType) {
+            resetTextEffect();
+            
+            switch(effectType) {
+                case 'glitch':
+                    dialogText.classList.add('glitch-text');
+                    break;
+                case 'blood':
+                    dialogText.classList.add('blood-text');
+                    break;
+                case 'distorted':
+                    dialogText.classList.add('distorted-text');
+                    break;
+            }
+        }
+
+        // Сбросить эффекты текста
+        function resetTextEffect() {
+            dialogText.classList.remove('glitch-text', 'blood-text', 'distorted-text');
+            dialogText.style.transform = '';
+            dialogText.style.opacity = '';
+            dialogText.style.color = '';
+            stopLetterMutation();
+        }
+
+        // Получить текущие данные сцены
+        function getCurrentScenes() {
+            if (gameState.currentPhase === 'initial') {
+                return initialScenes;
+            } else if (gameState.currentPhase === 'circus') {
+                return circusScenes;
+            }
+            return [];
+        }
+
+        // Функция затемнения экрана
+        function fadeOut() {
+            sceneTransition.style.visibility = 'visible';
+            sceneTransition.style.opacity = '1';
+        }
+
+        // Функция осветления экрана
+        function fadeIn() {
+            sceneTransition.style.opacity = '0';
+            setTimeout(() => {
+                sceneTransition.style.visibility = 'hidden';
+            }, 1000);
+        }
+
+        // Переход к следующей сцене
+        function nextScene() {
+            if (!gameState.canAdvance) return;
+            
+            const scenes = getCurrentScenes();
+            
+            if (gameState.currentScene < scenes.length - 1) {
+                gameState.currentScene++;
+                updateScene();
+            } else {
+                if (gameState.currentPhase === 'initial') {
+                    showFinalScreen();
+                }
+                // В случае цирка - просто останавливаемся на последней сцене
+                // Кнопка "Идти внутрь" уже будет показана через showEnterButton()
+            }
+        }
+
+        // Показать финальный экран с выбором
+        function showFinalScreen() {
+            sceneContainer.style.opacity = '0';
+            setTimeout(() => {
+                finalScreen.style.display = 'block';
+                setTimeout(() => {
+                    finalScreen.style.opacity = '1';
+                }, 100);
+            }, 500);
+        }
+
+        // Выбор "В цирк"
+        function chooseCircus() {
+            fadeOut();
+            
+            setTimeout(() => {
+                finalScreen.style.display = 'none';
+                gameState.currentPhase = 'circus';
+                gameState.currentScene = 0;
+                gameState.ticketShown = false;
+                gameState.showEnterButton = false;
+                sceneContainer.style.opacity = '1';
+                updateScene();
+                fadeIn();
+            }, 2000);
+        }
+
+        // Войти в цирк
+        function enterCircus() {
+            fadeOut();
+            setTimeout(() => {
+                window.location.href = 'Act1.html';
+            }, 2000);
+        }
+
+        // Пойти домой
+        function goHome() {
+            fadeOut();
+            setTimeout(() => {
+                window.location.href = 'EndingNo.html';
+            }, 2000);
+        }
+
+        // Обработка нажатия пробела
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && gameState.canAdvance && !gameState.showEnterButton) {
+                event.preventDefault();
+                nextScene();
+            }
+        });
+
+        // Клик для перехода
+        document.addEventListener('click', function(event) {
+            if (!gameState.canAdvance) return;
+            
+            if (!event.target.closest('.enter-button') && 
+                !event.target.closest('.circus-button') &&
+                !event.target.closest('.ticket-screen') &&
+                !gameState.showEnterButton) {
+                nextScene();
+            }
+        });
+
+        // Инициализация при загрузке страницы
+        window.addEventListener('load', function() {
+            setTimeout(initializeScene, 1000);
+        });
+
+        // Обработка ошибок загрузки изображений
+        characterPortrait.onerror = function() {
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiPuKEoiA8L3RleHQ+PC9zdmc+';
+            this.alt = "Изображение не найдено";
+        };
+    </script>
+</body>
+</html>

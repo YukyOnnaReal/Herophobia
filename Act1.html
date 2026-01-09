@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACT 1 - Загадочный цирк</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+            cursor: default;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Анимация появления из черного */
+        #fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            animation: fadeIn 3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* Анимация падения букв */
+        .act-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            background-color: #000;
+        }
+
+        .act-letter {
+            font-size: 300px;
+            font-weight: bold;
+            color: #ff0000;
+            margin: 0 40px;
+            opacity: 0;
+            transform: scale(5) translateY(-1000px);
+            text-shadow: 
+                0 0 5px #ff0000,
+                0 0 10px #cc0000,
+                0 0 15px #990000,
+                0 0 20px #660000,
+                0 0 25px #330000;
+        }
+
+        /* Анимация мерцания букв */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+            75% { opacity: 0.9; }
+        }
+
+        .act-letter.flicker {
+            animation: flicker 0.5s infinite alternate;
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 30px #ff0000;
+        }
+
+        /* Затемнение/осветление экрана */
+        .fade-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            opacity: 0;
+            z-index: 999;
+            pointer-events: none;
+            transition: opacity 2s;
+        }
+
+        /* Стиль для хаба Area */
+        .area-container, .corridor-container, .harlekab-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: none;
+            z-index: 10;
+        }
+
+        /* Точки-кнопки на Area */
+        .point {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, 
+                rgba(100, 0, 30, 0.8), 
+                rgba(60, 0, 15, 0.8));
+            border: 2px solid #800040;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 
+                0 0 15px rgba(100, 0, 30, 0.4),
+                inset 0 0 10px rgba(60, 0, 15, 0.3);
+            z-index: 100;
+        }
+
+        .point:hover {
+            transform: scale(1.5);
+            background: linear-gradient(145deg, 
+                rgba(120, 0, 40, 0.9), 
+                rgba(80, 0, 20, 0.9));
+            border-color: #a00050;
+            box-shadow: 
+                0 0 25px rgba(120, 0, 50, 0.6),
+                inset 0 0 15px rgba(80, 0, 25, 0.4);
+        }
+
+        /* Стрелка перехода */
+        .next-arrow {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, 
+                rgba(100, 0, 30, 0.8), 
+                rgba(60, 0, 15, 0.8));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid #800040;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 15px rgba(100, 0, 30, 0.4),
+                inset 0 0 10px rgba(60, 0, 15, 0.3);
+        }
+
+        .next-arrow:hover {
+            transform: translateY(-50%) scale(1.1);
+            background: linear-gradient(145deg, 
+                rgba(120, 0, 40, 0.9), 
+                rgba(80, 0, 20, 0.9));
+            border-color: #a00050;
+            box-shadow: 
+                0 0 25px rgba(120, 0, 50, 0.6),
+                inset 0 0 15px rgba(80, 0, 25, 0.4);
+        }
+
+        .next-arrow::after {
+            content: '→';
+            font-size: 40px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        /* Анимация перехода вбок */
+        @keyframes comicSwipe {
+            0% { 
+                transform: translateX(0); 
+                opacity: 0;
+            }
+            50% { 
+                transform: translateX(-50%); 
+                opacity: 0.7;
+            }
+            100% { 
+                transform: translateX(-100%); 
+                opacity: 0;
+            }
+        }
+
+        .comic-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            z-index: 500;
+            pointer-events: none;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 0, 0, 0.1) 25%,
+                rgba(255, 0, 0, 0.3) 50%,
+                rgba(255, 0, 0, 0.1) 75%,
+                transparent 100%);
+            animation: comicSwipe 0.5s forwards;
+        }
+
+        /* Стиль для кнопок в коридоре */
+        .room-button {
+            position: absolute;
+            padding: 15px 25px;
+            background: linear-gradient(145deg, 
+                rgba(100, 0, 30, 0.85), 
+                rgba(60, 0, 15, 0.85));
+            border: 2px solid #800040;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 250px;
+            box-shadow: 
+                0 0 15px rgba(100, 0, 30, 0.4),
+                inset 0 0 10px rgba(60, 0, 15, 0.3);
+            z-index: 100;
+        }
+
+        .room-button:hover {
+            background: linear-gradient(145deg, 
+                rgba(120, 0, 40, 0.95), 
+                rgba(80, 0, 20, 0.95));
+            transform: scale(1.05);
+            border-color: #a00050;
+            box-shadow: 
+                0 0 25px rgba(120, 0, 50, 0.6),
+                inset 0 0 15px rgba(80, 0, 25, 0.4);
+        }
+
+        /* Диалоговое окно */
+        .dialogue-container {
+            position: fixed;
+            bottom: 40px;
+            left: 60px;
+            width: calc(100% - 320px);
+            height: 25vh;
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            border: 1px solid rgba(120, 0, 40, 0.8);
+            box-shadow: 
+                0 0 30px rgba(120, 0, 40, 0.5),
+                inset 0 0 20px rgba(80, 0, 20, 0.3);
+            z-index: 100;
+            display: flex;
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            transition: all 0.5s ease;
+            display: none;
+        }
+
+        .character-name {
+            color: #ffcccc;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(200, 100, 120, 0.5);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .dialogue-text {
+            color: #ffffff;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            min-height: 100px;
+            padding: 15px;
+            border-radius: 5px;
+            background: rgba(30, 0, 10, 0.4);
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .character-portrait {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            background-color: #1a000a;
+            box-shadow: 0 0 20px rgba(80, 0, 20, 0.5);
+            z-index: 150;
+            display: none;
+        }
+
+        /* Авторская речь */
+        .author-note {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            border: 3px solid #800040;
+            border-radius: 10px;
+            padding: 30px;
+            color: #ffcccc;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            min-width: 300px;
+            box-shadow: 
+                0 0 40px rgba(100, 0, 30, 0.5),
+                inset 0 0 20px rgba(60, 0, 15, 0.3);
+        }
+
+        /* Экран с билетом (если потребуется) */
+        .ticket-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .ticket-image {
+            max-width: 60%;
+            max-height: 60%;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 60px rgba(180, 140, 0, 0.6),
+                0 0 30px rgba(150, 100, 0, 0.4),
+                0 0 15px rgba(120, 80, 0, 0.3);
+            animation: ticketGlow 2s infinite alternate;
+        }
+
+        @keyframes ticketGlow {
+            0% {
+                box-shadow: 
+                    0 0 50px rgba(180, 140, 0, 0.5),
+                    0 0 25px rgba(150, 100, 0, 0.3),
+                    0 0 10px rgba(120, 80, 0, 0.2);
+            }
+            100% {
+                box-shadow: 
+                    0 0 80px rgba(180, 140, 0, 0.8),
+                    0 0 40px rgba(150, 100, 0, 0.6),
+                    0 0 20px rgba(120, 80, 0, 0.4);
+            }
+        }
+
+        /* Переход между сценами */
+        .scene-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 10000;
+            transition: opacity 1s ease;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .dialogue-container {
+                width: calc(100% - 280px);
+            }
+            
+            .character-portrait {
+                width: 180px;
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .act-letter {
+                font-size: 200px;
+                margin: 0 20px;
+            }
+            
+            .character-portrait {
+                width: 150px;
+                height: 150px;
+                right: 20px;
+                bottom: 30px;
+            }
+            
+            .dialogue-container {
+                left: 20px;
+                width: calc(100% - 190px);
+                height: 30vh;
+                padding: 15px;
+            }
+            
+            .dialogue-text {
+                font-size: 1.2rem;
+                padding: 10px;
+            }
+            
+            .character-name {
+                font-size: 1.5rem;
+            }
+            
+            .room-button {
+                min-width: 200px;
+                padding: 12px 20px;
+                font-size: 1.2rem;
+            }
+            
+            .point {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .next-arrow {
+                width: 60px;
+                height: 60px;
+                right: 20px;
+            }
+            
+            .next-arrow::after {
+                font-size: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .act-letter {
+                font-size: 150px;
+                margin: 0 10px;
+            }
+            
+            .character-portrait {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .dialogue-container {
+                height: 35vh;
+                padding: 12px;
+                width: calc(100% - 150px);
+            }
+            
+            .dialogue-text {
+                font-size: 1rem;
+            }
+            
+            .character-name {
+                font-size: 1.2rem;
+            }
+            
+            .room-button {
+                min-width: 180px;
+                font-size: 1.1rem;
+                padding: 10px 15px;
+            }
+            
+            .point {
+                width: 25px;
+                height: 25px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Начальное затемнение -->
+    <div id="fade-overlay"></div>
+    
+    <!-- Анимация появления ACT 1 -->
+    <div class="act-container" id="actContainer">
+        <div class="act-letter" id="letterA">A</div>
+        <div class="act-letter" id="letterC">C</div>
+        <div class="act-letter" id="letterT">T</div>
+        <div class="act-letter" id="letter1">1</div>
+    </div>
+
+    <!-- Затемнение экрана -->
+    <div class="fade-screen" id="fadeScreen"></div>
+
+    <!-- Хаб Area -->
+    <div class="area-container" id="areaContainer" style="background-image: url('arts/area.jpg');">
+        <!-- Точки-персонажи (без Арлекино, Теней, Маэстро и Каина) -->
+        <div class="point" style="top: 20%; left: 15%;" data-name="Пьеро">П</div>
+        <div class="point" style="top: 30%; left: 70%;" data-name="Мизери">М</div>
+        <div class="point" style="top: 50%; left: 40%;" data-name="Фуфу">Ф</div>
+        <div class="point" style="top: 60%; left: 80%;" data-name="Ригар">Р</div>
+        <div class="point" style="top: 40%; left: 20%;" data-name="Каррус">К</div>
+        <div class="point" style="top: 70%; left: 60%;" data-name="Гутта">Г</div>
+        <div class="point" style="top: 25%; left: 55%;" data-name="Фата Моргана">ФМ</div>
+        <div class="point" style="top: 65%; left: 30%;" data-name="Калиостро">К</div>
+        <div class="point" style="top: 45%; left: 65%;" data-name="Пульсио">П</div>
+        <div class="point" style="top: 75%; left: 45%;" data-name="Китагава">К</div>
+        <div class="point" style="top: 35%; left: 85%;" data-name="Лоскут">Л</div>
+        
+        <!-- Стрелка перехода в коридор -->
+        <div class="next-arrow" id="toCorridor"></div>
+    </div>
+
+    <!-- Хаб Corridor -->
+    <div class="corridor-container" id="corridorContainer" style="background-image: url('arts/Corridore.jpg');">
+        <!-- Кнопки выбора комнат -->
+        <div class="room-button" style="top: 15%; left: 10%;" data-room="Пьеро">Комната Пьеро</div>
+        <div class="room-button" style="top: 25%; left: 30%;" data-room="Мизери">Комната Мизери</div>
+        <div class="room-button" style="top: 35%; left: 50%;" data-room="Фата Моргана">Комната Фата Моргана</div>
+        <div class="room-button" style="top: 45%; left: 70%;" data-room="Китагава">Комната Китагава</div>
+        <div class="room-button" style="top: 55%; left: 10%;" data-room="Лоскут">Комната Лоскута</div>
+        <div class="room-button" style="top: 65%; left: 30%;" data-room="Арлекино">Кабинет Арлекино</div>
+    </div>
+
+    <!-- Кабинет Арлекино -->
+    <div class="harlekab-container" id="harlekabContainer" style="background-image: url('arts/Harlekab.jpg'); display: none;">
+        <!-- Точка Арлекино -->
+        <div class="point" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" data-name="Арлекино">А</div>
+    </div>
+
+    <!-- Диалоговое окно -->
+    <div class="dialogue-container" id="dialogueContainer">
+        <div class="character-name" id="dialogueCharacterName">Арлекино</div>
+        <div class="dialogue-text" id="dialogueText"></div>
+        <div class="character-portrait" id="characterPortrait"></div>
+    </div>
+
+    <!-- Авторская речь -->
+    <div class="author-note" id="authorNote">Персонаж ещё недоступен</div>
+
+    <!-- Переход между сценами -->
+    <div class="scene-transition" id="scene-transition"></div>
+
+    <!-- Экран с билетом (если потребуется) -->
+    <div class="ticket-screen" id="ticket-screen">
+        <img src="arts/Ticket.png" alt="Билет" class="ticket-image">
+    </div>
+
+    <!-- Аудио элементы -->
+    <audio id="smashSound" src="music/SmashBookvi.mp3" preload="auto"></audio>
+    <audio id="menuMusic" src="music/Game menu.mp3" preload="auto"></audio>
+    <audio id="sanctumMusic" src="music/Trickster's Sanctum (Remix).mp3" preload="auto"></audio>
+    <audio id="skripSound" src="skrip.mp3" preload="auto"></audio>
+
+    <script>
+        // Элементы DOM
+        const actContainer = document.getElementById('actContainer');
+        const letters = ['letterA', 'letterC', 'letterT', 'letter1'];
+        const fadeScreen = document.getElementById('fadeScreen');
+        const areaContainer = document.getElementById('areaContainer');
+        const corridorContainer = document.getElementById('corridorContainer');
+        const harlekabContainer = document.getElementById('harlekabContainer');
+        const toCorridor = document.getElementById('toCorridor');
+        const authorNote = document.getElementById('authorNote');
+        const dialogueContainer = document.getElementById('dialogueContainer');
+        const dialogueText = document.getElementById('dialogueText');
+        const characterPortrait = document.getElementById('characterPortrait');
+        const dialogueCharacterName = document.getElementById('dialogueCharacterName');
+        const sceneTransition = document.getElementById('scene-transition');
+        
+        // Аудио элементы
+        const smashSound = document.getElementById('smashSound');
+        const menuMusic = document.getElementById('menuMusic');
+        const sanctumMusic = document.getElementById('sanctumMusic');
+        const skripSound = document.getElementById('skripSound');
+
+        // Диалог с Арлекино (60 реплик)
+        const harlequinDialogue = [
+            { character: "Арлекино", text: "Вы стоите в дверях кабинета, не решаясь сделать шаг внутрь.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Извините, я... фотограф. Меня пригласили сделать репортаж о цирке." },
+            { character: "Арлекино", text: "Я знаю, кто вы. Вопрос в том, что вы здесь делаете сейчас?", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я хотел осмотреть место, познакомиться с атмосферой перед съёмками." },
+            { character: "Арлекино", text: "Атмосфера. Интересное слово для такого места.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Цирк выглядит... необычно. Старинный." },
+            { character: "Арлекино", text: "Ему много лет. Как и мне.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Вы управляете этим местом уже долго?" },
+            { character: "Арлекино", text: "Достаточно долго, чтобы устать от вопросов.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Извините, я не хотел быть навязчивым." },
+            { character: "Арлекино", text: "Но вы им являетесь. Все фотографы одинаковы.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я просто пытаюсь понять это место. Уловить его суть." },
+            { character: "Арлекино", text: "Суть? Вы думаете, что сможете её уловить за пару дней?", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я постараюсь. Мой опыт..." },
+            { character: "Арлекино", text: "Ваш опыт здесь ничего не значит.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Почему вы так говорите?" },
+            { character: "Арлекино", text: "Потому что этот цирк — не просто шатёр с клоунами.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я это чувствую. Здесь что-то... особенное." },
+            { character: "Арлекино", text: "Особенное. Да, можно и так сказать.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Можете рассказать мне об этом?" },
+            { character: "Арлекино", text: "Нет.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Но тогда как я смогу сделать хороший репортаж?" },
+            { character: "Арлекино", text: "Это ваша проблема, а не моя.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я видел ваших артистов. Они кажутся... грустными." },
+            { character: "Арлекино", text: "У них своя жизнь. Свои истории.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "И вы знаете эти истории?" },
+            { character: "Арлекино", text: "Я знаю всё, что происходит в этом цирке.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Тогда расскажите хотя бы о ком-то одном." },
+            { character: "Арлекино", text: "Зачем? Чтобы вы написали об этом в своей статье?", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Чтобы понять. Чтобы показать настоящий цирк." },
+            { character: "Арлекино", text: "Настоящий цирк. Вы даже не представляете, что это значит.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Тогда объясните мне." },
+            { character: "Арлекино", text: "Вы умеете ходить по канату?", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Что? Нет, конечно. Я фотограф, а не акробат." },
+            { character: "Арлекино", text: "Жаль. Каждый здесь должен уметь держать равновесие.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Это метафора?" },
+            { character: "Арлекино", text: "Это необходимость.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я не понимаю." },
+            { character: "Арлекино", text: "И не поймёте. И это к лучшему.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Но я должен понять, если хочу сделать хорошую работу." },
+            { character: "Арлекино", text: "Ваша работа — сделать снимки и уйти. Вот и всё.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я не могу просто снять поверхностные кадры. Мне нужна глубина." },
+            { character: "Арлекино", text: "Глубина здесь может поглотить.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Вы говорите загадками." },
+            { character: "Арлекино", text: "Потому что некоторые вещи нельзя сказать прямо.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Но почему?" },
+            { character: "Арлекино", text: "Правила цирка. Мы все им подчиняемся.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Даже вы?" },
+            { character: "Арлекино", text: "Особенно я.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Кто создал эти правила?" },
+            { character: "Арлекино", text: "Вопросы, вопросы... Вы утомляете.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Я просто пытаюсь разобраться." },
+            { character: "Арлекино", text: "Некоторые вещи не предназначены для того, чтобы их понимали.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Но тогда зачем вообще этот цирк существует?" },
+            { character: "Арлекино", text: "Чтобы напоминать. Чтобы хранить. Чтобы искупать.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Искупать что?" },
+            { character: "Арлекино", text: "Достаточно. Мое терпение на исходе.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "Подождите, я..." },
+            { character: "Арлекино", text: "Нет. Уходите. Не тратьте моё время.", portrait: "arts/HarlequinoACT1.png" },
+            { character: "Вы", text: "...Хорошо. Извините за беспокойство." }
+        ];
+
+        let currentDialogueIndex = 0;
+        let canAdvance = true;
+
+        // Функция запуска анимации ACT 1
+        function startActAnimation() {
+            let delay = 0;
+            
+            letters.forEach((letterId, index) => {
+                const letter = document.getElementById(letterId);
+                
+                // Падение буквы
+                setTimeout(() => {
+                    smashSound.currentTime = 0;
+                    smashSound.play();
+                    
+                    letter.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s';
+                    letter.style.opacity = '1';
+                    letter.style.transform = 'scale(1) translateY(0)';
+                }, delay);
+                
+                delay += 800; // Задержка между буквами
+            });
+            
+            // Мерцание букв
+            setTimeout(() => {
+                letters.forEach(letterId => {
+                    const letter = document.getElementById(letterId);
+                    letter.classList.add('flicker');
+                });
+            }, delay + 500);
+            
+            // Затемнение через 5 секунд
+            setTimeout(() => {
+                fadeScreen.style.opacity = '1';
+                
+                setTimeout(() => {
+                    actContainer.style.display = 'none';
+                    fadeScreen.style.opacity = '0';
+                    
+                    // Показ Area через 2 секунды
+                    setTimeout(() => {
+                        areaContainer.style.display = 'block';
+                        menuMusic.loop = true;
+                        menuMusic.volume = 0.6;
+                        menuMusic.play();
+                    }, 2000);
+                    
+                }, 2000);
+            }, 5000);
+        }
+
+        // Показать авторскую речь
+        function showAuthorNote(text) {
+            authorNote.textContent = text;
+            authorNote.style.display = 'block';
+            
+            setTimeout(() => {
+                authorNote.style.display = 'none';
+            }, 2000);
+        }
+
+        // Анимация перехода в коридор
+        function goToCorridor() {
+            canAdvance = false;
+            
+            const transition = document.createElement('div');
+            transition.className = 'comic-transition';
+            document.body.appendChild(transition);
+            
+            menuMusic.pause();
+            
+            setTimeout(() => {
+                areaContainer.style.display = 'none';
+                corridorContainer.style.display = 'block';
+                menuMusic.currentTime = 0;
+                menuMusic.play();
+                
+                setTimeout(() => {
+                    transition.remove();
+                    canAdvance = true;
+                }, 500);
+            }, 500);
+        }
+
+        // Переход в кабинет Арлекино
+        function goToHarlekab() {
+            canAdvance = false;
+            
+            skripSound.currentTime = 0;
+            skripSound.play();
+            
+            fadeScreen.style.opacity = '1';
+            
+            setTimeout(() => {
+                corridorContainer.style.display = 'none';
+                harlekabContainer.style.display = 'block';
+                sanctumMusic.loop = true;
+                sanctumMusic.volume = 0.6;
+                sanctumMusic.play();
+                
+                fadeScreen.style.opacity = '0';
+                canAdvance = true;
+            }, 1000);
+        }
+
+        // Начало диалога с Арлекино
+        function startHarlequinDialogue() {
+            harlekabContainer.style.display = 'none';
+            dialogueContainer.style.display = 'block';
+            characterPortrait.style.display = 'block';
+            showDialogue();
+        }
+
+        // Показ диалога
+        function showDialogue() {
+            if (currentDialogueIndex >= harlequinDialogue.length) {
+                endDialogue();
+                return;
+            }
+            
+            const dialogue = harlequinDialogue[currentDialogueIndex];
+            
+            dialogueCharacterName.textContent = dialogue.character;
+            dialogueText.textContent = dialogue.text;
+            
+            // Установка портрета
+            if (dialogue.portrait) {
+                characterPortrait.src = dialogue.portrait;
+                characterPortrait.alt = dialogue.character;
+                characterPortrait.style.display = 'block';
+            } else {
+                characterPortrait.style.display = 'none';
+            }
+        }
+
+        // Переход к следующей реплике
+        function nextDialogue() {
+            if (currentDialogueIndex < harlequinDialogue.length - 1) {
+                currentDialogueIndex++;
+                showDialogue();
+            } else {
+                endDialogue();
+            }
+        }
+
+        // Завершение диалога
+        function endDialogue() {
+            dialogueContainer.style.display = 'none';
+            sanctumMusic.pause();
+            areaContainer.style.display = 'block';
+            menuMusic.play();
+            currentDialogueIndex = 0; // Сброс для возможного повторного прохождения
+        }
+
+        // Функция затемнения экрана
+        function fadeOut() {
+            sceneTransition.style.visibility = 'visible';
+            sceneTransition.style.opacity = '1';
+        }
+
+        // Функция осветления экрана
+        function fadeIn() {
+            sceneTransition.style.opacity = '0';
+            setTimeout(() => {
+                sceneTransition.style.visibility = 'hidden';
+            }, 1000);
+        }
+
+        // Обработчики событий
+        document.addEventListener('DOMContentLoaded', () => {
+            // Запуск анимации ACT 1
+            setTimeout(startActAnimation, 500);
+            
+            // Клик по точкам на Area
+            document.querySelectorAll('#areaContainer .point').forEach(point => {
+                point.addEventListener('click', () => {
+                    const name = point.getAttribute('data-name');
+                    showAuthorNote(`Персонаж "${name}" ещё недоступен`);
+                });
+            });
+            
+            // Переход в коридор
+            toCorridor.addEventListener('click', () => {
+                if (canAdvance) goToCorridor();
+            });
+            
+            // Клик по кнопкам комнат в коридоре
+            document.querySelectorAll('#corridorContainer .room-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!canAdvance) return;
+                    
+                    const room = button.getAttribute('data-room');
+                    
+                    if (room === 'Арлекино') {
+                        goToHarlekab();
+                    } else {
+                        showAuthorNote(`Комната "${room}" пока недоступна`);
+                    }
+                });
+            });
+            
+            // Клик по точке Арлекино в его кабинете
+            document.querySelector('#harlekabContainer .point')?.addEventListener('click', () => {
+                if (canAdvance) startHarlequinDialogue();
+            });
+            
+            // Клик по диалоговому окну для перехода к следующей реплике
+            dialogueContainer.addEventListener('click', () => {
+                if (canAdvance) nextDialogue();
+            });
+            
+            // Обработка нажатия пробела
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space' && canAdvance) {
+                    event.preventDefault();
+                    
+                    if (dialogueContainer.style.display === 'block') {
+                        nextDialogue();
+                    }
+                }
+            });
+        });
+
+        // Обработка ошибок загрузки изображений
+        if (characterPortrait) {
+            characterPortrait.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiPuKEoiA8L3RleHQ+PC9zdmc+';
+                this.alt = "Изображение не найдено";
+            };
+        }
+    </script>
+</body>
+</html>

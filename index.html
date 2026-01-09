@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herophobia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: default;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+            background-image: radial-gradient(circle at 20% 50%, rgba(255, 51, 51, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(255, 102, 102, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 40% 80%, rgba(153, 0, 0, 0.1) 0%, transparent 50%);
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 45px;
+            width: 100%;
+            max-width: 700px;
+            padding: 35px;
+        }
+
+        .game-title {
+            font-size: 3.7rem;
+            letter-spacing: 11px;
+            text-transform: uppercase;
+            color: #ff3333;
+            text-shadow: 
+                0 0 0 2px #330000,
+                0 0 0 4px #1a0000,
+                0 0 10px #ff3333,
+                0 0 20px #ff3333;
+            margin-bottom: 8px;
+            font-weight: 900;
+            position: relative;
+            text-align: center;
+            padding: 10px 18px;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: #cccccc;
+            font-style: italic;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+            letter-spacing: 3.5px;
+            font-weight: normal;
+            text-align: center;
+        }
+
+        /* Браслет из шариков с отблеском */
+        .bracelet-container {
+            position: relative;
+            width: 185px;
+            height: 185px;
+            margin: 22px 0;
+        }
+
+        .bracelet-ball {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            margin-left: -18px;
+            margin-top: -18px;
+            animation: braceletOrbit 3.3s linear infinite;
+            transform-origin: 74px 0;
+            z-index: 2;
+        }
+
+        /* 5 разных цветов шариков с матовой поверхностью и отблеском */
+        .ball-1 {
+            background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation-delay: 0s;
+        }
+
+        .ball-2 {
+            background: radial-gradient(circle at 30% 30%, #6699ff, #0033cc);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation-delay: -0.66s;
+        }
+
+        .ball-3 {
+            background: radial-gradient(circle at 30% 30%, #66cc66, #006600);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation-delay: -1.32s;
+        }
+
+        .ball-4 {
+            background: radial-gradient(circle at 30% 30%, #ffcc66, #cc9900);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation-delay: -1.98s;
+        }
+
+        .ball-5 {
+            background: radial-gradient(circle at 30% 30%, #cc66ff, #6600cc);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation-delay: -2.64s;
+        }
+
+        /* Анимация вращения по кругу */
+        @keyframes braceletOrbit {
+            0% {
+                transform: rotate(0deg) translateX(74px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(74px) rotate(-360deg);
+            }
+        }
+
+        /* Линия загрузки */
+        .loading-bar-container {
+            width: 100%;
+            max-width: 470px;
+            margin-top: 18px;
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: #ff6666;
+            text-align: center;
+            margin-bottom: 14px;
+            text-shadow: 0 0 7px rgba(255, 102, 102, 0.4);
+            font-weight: bold;
+            letter-spacing: 0.9px;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 5.5px;
+            background: rgba(255, 51, 51, 0.18);
+            border-radius: 2.75px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #ff3333,
+                #ff6666);
+            border-radius: 2.75px;
+            transition: width 0.4s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(255, 255, 255, 0.35),
+                transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        .percentage {
+            font-size: 1.6rem;
+            color: #ffffff;
+            text-align: center;
+            margin-top: 14px;
+            font-weight: bold;
+            text-shadow: 
+                0 0 7px #ff3333,
+                0 0 14px #ff3333;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Единственный факт */
+        .fact-container {
+            width: 100%;
+            max-width: 580px;
+            margin-top: 20px;
+            min-height: 55px;
+        }
+
+        .fact-text {
+            font-size: 1rem;
+            color: #ccddff;
+            text-align: center;
+            line-height: 1.5;
+            font-style: italic;
+            padding: 10px 16px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            font-weight: 300;
+            position: relative;
+            text-shadow: 
+                0 0 8px rgba(204, 221, 255, 0.3),
+                0 0 16px rgba(204, 221, 255, 0.15);
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 102, 153, 0.05) 20%,
+                rgba(255, 102, 153, 0.05) 80%,
+                transparent 100%);
+        }
+
+        /* Анимации */
+        @keyframes progressShine {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+                letter-spacing: 7px;
+            }
+            
+            .game-subtitle {
+                font-size: 1rem;
+                letter-spacing: 2.5px;
+            }
+            
+            .loading-container {
+                gap: 35px;
+                padding: 25px;
+            }
+            
+            .bracelet-container {
+                width: 155px;
+                height: 155px;
+            }
+            
+            .bracelet-ball {
+                width: 31px;
+                height: 31px;
+                margin-left: -15.5px;
+                margin-top: -15.5px;
+                transform-origin: 62px 0;
+            }
+            
+            .loading-text {
+                font-size: 0.95rem;
+            }
+            
+            .percentage {
+                font-size: 1.4rem;
+            }
+            
+            .fact-text {
+                font-size: 0.9rem;
+                padding: 8px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
+            
+            .game-subtitle {
+                font-size: 0.85rem;
+                letter-spacing: 2px;
+            }
+            
+            .loading-container {
+                gap: 30px;
+                padding: 20px;
+            }
+            
+            .bracelet-container {
+                width: 135px;
+                height: 135px;
+            }
+            
+            .bracelet-ball {
+                width: 28px;
+                height: 28px;
+                margin-left: -14px;
+                margin-top: -14px;
+                transform-origin: 54px 0;
+            }
+            
+            .fact-text {
+                font-size: 0.85rem;
+                padding: 7px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="title-section">
+            <h1 class="game-title">HEROPHOBIA</h1>
+            <h2 class="game-subtitle">The Last Show Must Never End</h2>
+        </div>
+
+        <div class="bracelet-container">
+            <div class="bracelet-ball ball-1"></div>
+            <div class="bracelet-ball ball-2"></div>
+            <div class="bracelet-ball ball-3"></div>
+            <div class="bracelet-ball ball-4"></div>
+            <div class="bracelet-ball ball-5"></div>
+        </div>
+
+        <div class="loading-bar-container">
+            <div class="loading-text">ЗАГРУЗКА ПРЕДСТАВЛЕНИЯ...</div>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <div class="percentage" id="percentage">0%</div>
+        </div>
+
+        <div class="fact-container">
+            <div class="fact-text" id="factText"></div>
+        </div>
+    </div>
+
+    <script>
+        // 30 мемных фактов о персонажах
+        const characterFacts = [
+  "Арлекино хранит в кармане сломанные часы. Говорит, что они всё равно показывают правильное время два раза в сутки.",
+  "Мизери помнит день рождения каждого артиста цирка. Даже тех, кто уже давно не выступает.",
+  "Фуфу однажды застряла в вентиляции. Не желая позориться, она весь день ела крошки, которые падали сверху.",
+  "Пьеро разговаривает с куклами больше, чем с людьми. Куклы, кстати, отвечают ему чаще, чем собственные сокомандники.",
+  "Ригар обожает слушать детские песенки, хотя остальные участники труппы уверены, что в наушниках у него играет исключительно тяжёлый метал.",
+  "Каррус дрессирует невидимых зверей. Говорит, они очень послушные и не гадят где попало.",
+  "Гутта проглатывает мечи, но панически боится таблеток. Приходится толочь их в порошок.",
+  "Фата Моргана ссорятся из-за того, чья очередь мыть посуду. Обычно моет та, которая сегодня 'не существует'.",
+  "Калиостро предсказывает будущее, но забывает, где оставила ключи. Ирония судьбы.",
+  "Пульсио играет на шарманке одну мелодию. Уже 30 лет. Артисты знают её наизусть.",
+  "Китагава настраивает скрипку по камертону, который настраивает по другому камертону.",
+  "Лоскут шьёт костюмы с запасом. 'На случай если кто-то внезапно поправится', — говорит он.",
+  "Тени Арлекино путают право и лево. Иногда им очень тяжело сражаться.",
+  "Пьеро однажды учил кукол играть в покер. В тот день он задолжал Арлекино крупную сумму.",
+  "Мизери коллекционирует перчатки. Только левые. Почему именно левые — на этот вопрос она лишь загадочно улыбается.",
+  "Фуфу может спать в любом положении. Даже стоя на одной руке. Проверено.",
+  "Ригар панически боится мышей.",
+  "Каррус кормит 'невидимых зверей' специальным кормом. По факту — воздух, а стоит, как половина его зарплаты...",
+  "Гутта обожает леденцы от кашля. Съедает по пачке в день, объясняя это 'профилактикой'.",
+  "Близняшки Фата Моргана играют в шахматы сами с собой. Интересно, почему у них всегда выходит 'ничья'?",
+  "Калиостро гадает на кофейной гуще. Потом три часа отмывает чашку.",
+  "Фуфу может завязать шнурки на ботинках, не наклоняясь. Она гордится этим больше, чем акробатическими трюками.",
+  "Китагава играет гаммы по 5 часов в день. Соседи снизу уже подумывают о переезде.",
+  "Тени Арлекино любят играть в прятки. Проблема в том, что их всегда находят первыми — они же тени.",
+  "Арлекино пьёт чай с пятью ложками сахара. Загадка, как у него получается держать зубы в столь идеальном состоянии?...",
+  "Фуфу умеет подражать голосу Арлекино. Она делает это только тогда, когда уверена, что ведущий не слышит.",
+  "Лоскут не воспринимает швейные машины. Он работает только вручную, потому что 'машина не чувствует душу ткани'.",
+  "Однажды куклы взбунтовались и послали Пьеро на три буквы. Кукловод рыдал три с половиной дня.",
+  "По словам Арлекино, Мизери отлично готовит, правда подпускать её к плите после одного случая никто не решается.",
+  "Ригар считает, что протеин — это заговор. Ест только куриную грудку и морковку."
+        ];
+
+        // Элементы DOM
+        const loadingProgress = document.getElementById('loadingProgress');
+        const percentage = document.getElementById('percentage');
+        const factText = document.getElementById('factText');
+
+        // Текущий прогресс
+        let progress = 0;
+        let currentFactIndex = -1;
+
+        // Выбираем случайный факт при загрузке
+        function selectRandomFact() {
+            currentFactIndex = Math.floor(Math.random() * characterFacts.length);
+            factText.textContent = characterFacts[currentFactIndex];
+            factText.style.opacity = '1';
+        }
+
+        // Функция для обновления прогресса
+        function updateProgress() {
+            // Случайное увеличение прогресса
+            const increment = Math.random() * 4 + 1; // 1-5%
+            
+            progress = Math.min(progress + increment, 100);
+            
+            // Обновляем визуальные элементы
+            loadingProgress.style.width = progress + '%';
+            percentage.textContent = Math.round(progress) + '%';
+            
+            // Если загрузка завершена
+            if (progress >= 100) {
+                // Задержка перед переходом
+                setTimeout(() => {
+                    // Плавное исчезновение
+                    document.body.style.transition = 'opacity 0.6s ease';
+                    document.body.style.opacity = '0';
+                    
+                    // Переход на следующую страницу
+                    setTimeout(() => {
+                        window.location.href = 'EnterMenu.html';
+                    }, 600);
+                }, 800);
+            } else {
+                // Продолжаем загрузку
+                const nextDelay = Math.random() * 300 + 200; // 200-500ms
+                setTimeout(updateProgress, nextDelay);
+            }
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Показываем случайный факт сразу
+            selectRandomFact();
+            
+            // Начинаем загрузку с небольшой задержкой
+            setTimeout(() => {
+                updateProgress();
+            }, 600);
+        });
+
+        // Предотвращение контекстного меню и выделения
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

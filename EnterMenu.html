@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herophobia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: default;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            background-image: url('arts/Фон1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+            padding: 10px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .main-header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .title-container {
+            position: relative;
+            display: inline-block;
+            padding: 15px 30px;
+        }
+
+        .game-title {
+            font-size: 5.5rem;
+            letter-spacing: 15px;
+            text-transform: uppercase;
+            color: #ff3333;
+            text-shadow: 
+                0 0 5px #ff0000,
+                0 0 10px #ff3333,
+                0 0 15px #ff3333,
+                0 0 20px #ff3333,
+                0 0 25px #ff3333,
+                /* Обводка - два тона темнее */
+                0 0 0 2px #990000,
+                0 0 0 4px #660000;
+            animation: neonPulse 1.5s infinite alternate;
+            margin-bottom: 15px;
+            font-weight: 900;
+            position: relative;
+            padding: 0;
+        }
+
+        .game-subtitle {
+            font-size: 1.8rem;
+            color: #b6faff;
+            font-style: italic;
+            text-shadow: 
+                0 0 5px #ffffff,
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 15px rgba(190, 190, 190, 0.6),
+                0 0 0 1px #a5a5a5,
+                0 0 0 2px #7c7c7c;
+            padding: 10px 20px;
+            position: relative;
+            animation: subtitleGlow 4s infinite alternate;
+            letter-spacing: 4px;
+            font-weight: bold;
+        }
+
+        /* Основное меню */
+        .main-content {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .menu-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .main-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .menu-button {
+            background: linear-gradient(145deg, 
+                rgba(255, 51, 51, 0.2), 
+                rgba(153, 0, 0, 0.2));
+            border: 2px solid #ff3333;
+            border-radius: 12px;
+            color: #ffffff;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 0 15px rgba(255, 51, 51, 0.4),
+                inset 0 0 10px rgba(255, 51, 51, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        .menu-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.7s;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-3px);
+            border-color: #ff6666;
+            box-shadow: 
+                0 0 20px #ff6666,
+                0 0 40px rgba(255, 102, 102, 0.4),
+                inset 0 0 15px rgba(255, 102, 102, 0.25);
+            animation: buttonShake 0.5s ease-in-out infinite alternate;
+            color: #ffcccc;
+            background: linear-gradient(145deg, 
+                rgba(255, 102, 102, 0.3), 
+                rgba(204, 0, 0, 0.3));
+        }
+
+        .menu-button:hover::before {
+            left: 100%;
+        }
+
+        .menu-button:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: transform 0.1s;
+        }
+
+        .button-icon {
+            margin-right: 15px;
+            font-size: 1.4rem;
+            vertical-align: middle;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+
+        .button-text {
+            vertical-align: middle;
+            font-weight: bold;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        /* Оверлей для дисклеймера */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            transition: background 1s ease;
+            overflow: hidden;
+        }
+
+        .disclaimer {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh; /* Уменьшил максимальную высоту */
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 1s ease, transform 1s ease;
+            position: relative;
+            box-shadow: 
+                0 0 80px rgba(255, 51, 51, 0.6),
+                inset 0 0 30px rgba(255, 51, 51, 0.2);
+            border-radius: 15px;
+            margin: 5% auto;
+            overflow: hidden; /* Убрал скроллинг */
+        }
+
+        .disclaimer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 100%; /* Ограничиваем высоту содержимого */
+        }
+
+        .disclaimer::before {
+            content: '⚠';
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 20px;
+            color: #ff3333;
+            text-shadow: 
+                0 0 20px #ff3333,
+                0 0 40px #ff3333;
+            animation: brokenLight 1s infinite alternate;
+        }
+
+        .disclaimer h2 {
+            color: #ff3333;
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 
+                0 0 10px #ff3333,
+                0 0 20px #ff3333;
+            animation: neonFlicker 2s infinite alternate;
+            padding: 15px 0;
+            position: relative;
+        }
+
+        .disclaimer h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff3333, transparent);
+        }
+
+        .disclaimer p {
+            color: #cccccc;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin: 0;
+            font-style: italic;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            padding: 8px;
+        }
+
+        .disclaimer-warning {
+            color: #ff3333 !important;
+            font-weight: bold;
+            font-size: 1.4rem !important;
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #ff3333;
+            background: linear-gradient(45deg, 
+                rgba(255, 51, 51, 0.1), 
+                rgba(204, 0, 0, 0.05));
+            text-shadow: 
+                0 0 10px #ff3333,
+                0 0 20px #ff3333 !important;
+            animation: warningPulse 1.5s infinite alternate;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .disclaimer-warning::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 51, 51, 0.2), 
+                transparent);
+            animation: warningSlide 2.5s infinite;
+        }
+
+        /* Окно настроек */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-content {
+            background: linear-gradient(135deg, 
+                rgba(40, 0, 0, 0.95), 
+                rgba(60, 0, 0, 0.95));
+            border: 3px solid #ff3333;
+            border-radius: 15px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 
+                0 0 60px rgba(255, 51, 51, 0.6),
+                inset 0 0 30px rgba(255, 51, 51, 0.2);
+            position: relative;
+        }
+
+        .settings-title {
+            color: #ffffff;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 
+                0 0 10px #ff3333,
+                0 0 20px #ff3333;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff3333;
+        }
+
+        .setting-group {
+            margin-bottom: 30px;
+        }
+
+        .setting-label {
+            display: block;
+            color: #ff9999;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-style: italic;
+            text-shadow: 0 0 8px #ff6666;
+            text-align: center;
+        }
+
+        .volume-slider-container {
+            position: relative;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 5px;
+            border: 2px solid #ff3333;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 0, 0, 0.7),
+                0 0 12px rgba(255, 51, 51, 0.4);
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 25px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, 
+                #330000, 
+                #ff3333, 
+                #ff3333);
+            border-radius: 12px;
+            outline: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 35px;
+            height: 35px;
+            background: #ff6666;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 
+                0 0 15px #ff6666,
+                0 0 30px #ff6666;
+            transition: all 0.3s;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 
+                0 0 20px #ff6666,
+                0 0 40px #ff6666;
+        }
+
+        .close-settings {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 102, 102, 0.3);
+            border: 2px solid #ff6666;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-settings:hover {
+            background: #ff6666;
+            transform: rotate(90deg);
+            box-shadow: 0 0 20px #ff6666;
+        }
+
+        /* Анимации */
+        @keyframes neonPulse {
+            0% {
+                text-shadow: 
+                    0 0 5px #ff0000,
+                    0 0 10px #ff3333,
+                    0 0 15px #ff3333,
+                    0 0 20px #ff3333,
+                    0 0 25px #ff3333,
+                    0 0 0 2px #990000,
+                    0 0 0 4px #660000;
+            }
+            100% {
+                text-shadow: 
+                    0 0 8px #ff0000,
+                    0 0 16px #ff3333,
+                    0 0 24px #ff3333,
+                    0 0 32px #ff3333,
+                    0 0 40px #ff3333,
+                    0 0 0 2px #990000,
+                    0 0 0 4px #660000;
+            }
+        }
+
+        @keyframes subtitleGlow {
+            0% {
+                text-shadow: 
+                    0 0 5px #ffffff,
+                    0 0 10px rgba(255, 255, 255, 0.8),
+                    0 0 15px rgba(255, 255, 255, 0.6),
+                    0 0 0 1px #cccccc,
+                    0 0 0 2px #999999;
+            }
+            100% {
+                text-shadow: 
+                    0 0 8px #ffffff,
+                    0 0 16px rgba(255, 255, 255, 0.9),
+                    0 0 24px rgba(255, 255, 255, 0.7),
+                    0 0 0 1px #cccccc,
+                    0 0 0 2px #999999;
+            }
+        }
+
+        @keyframes buttonShake {
+            0% {
+                transform: translateY(-3px) rotate(0.3deg);
+            }
+            100% {
+                transform: translateY(-3px) rotate(-0.3deg);
+            }
+        }
+
+        @keyframes brokenLight {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 
+                    0 0 20px #ff3333,
+                    0 0 40px #ff3333;
+            }
+            50% {
+                opacity: 0.4;
+                text-shadow: 
+                    0 0 10px #ff3333,
+                    0 0 20px #ff3333;
+            }
+            25%, 75% {
+                opacity: 0.7;
+                text-shadow: 
+                    0 0 15px #ff3333,
+                    0 0 30px #ff3333;
+            }
+        }
+
+        @keyframes neonFlicker {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px #ff3333,
+                    0 0 20px #ff3333;
+                opacity: 1;
+            }
+            50% {
+                text-shadow: 
+                    0 0 15px #ff3333,
+                    0 0 30px #ff3333,
+                    0 0 45px #ff3333;
+                opacity: 0.9;
+            }
+            25%, 75% {
+                text-shadow: 
+                    0 0 8px #ff3333,
+                    0 0 16px #ff3333,
+                    0 0 24px #ff3333;
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes warningPulse {
+            0% {
+                box-shadow: 
+                    inset 0 0 10px rgba(255, 51, 51, 0.2),
+                    0 0 15px rgba(255, 51, 51, 0.4);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 
+                    inset 0 0 20px rgba(255, 51, 51, 0.3),
+                    0 0 30px rgba(255, 51, 51, 0.6);
+                transform: scale(1.01);
+            }
+        }
+
+        @keyframes warningSlide {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 3.5rem;
+                letter-spacing: 10px;
+                padding: 15px 25px;
+            }
+            
+            .game-subtitle {
+                font-size: 1.3rem;
+                letter-spacing: 3px;
+                padding: 8px 15px;
+            }
+            
+            .main-header {
+                margin-bottom: 40px;
+            }
+            
+            .menu-button {
+                padding: 12px 30px;
+                font-size: 1.2rem;
+                max-width: 300px;
+            }
+            
+            .button-icon {
+                font-size: 1.2rem;
+                margin-right: 12px;
+            }
+            
+            .disclaimer {
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            .disclaimer h2 {
+                font-size: 1.8rem;
+            }
+            
+            .disclaimer p {
+                font-size: 1rem;
+            }
+            
+            .disclaimer-warning {
+                font-size: 1.2rem;
+                padding: 12px;
+            }
+            
+            .settings-title {
+                font-size: 1.5rem;
+            }
+            
+            .setting-label {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2.5rem;
+                letter-spacing: 6px;
+                padding: 12px 20px;
+            }
+            
+            .game-subtitle {
+                font-size: 1rem;
+                letter-spacing: 2px;
+                padding: 6px 12px;
+            }
+            
+            .main-header {
+                margin-bottom: 30px;
+            }
+            
+            .menu-button {
+                max-width: 280px;
+                padding: 10px 25px;
+                font-size: 1.1rem;
+            }
+            
+            .button-icon {
+                font-size: 1.1rem;
+                margin-right: 10px;
+            }
+            
+            .disclaimer h2 {
+                font-size: 1.5rem;
+            }
+            
+            .disclaimer p {
+                font-size: 0.9rem;
+            }
+            
+            .disclaimer-warning {
+                font-size: 1rem;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Аудио элементы -->
+    <audio id="mainTheme" loop>
+        <source src="Core/Herophobia/music/MainTheme.mp3" type="audio/mpeg">
+        <source src="music/MainTheme.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="laughtSound">
+        <source src="Core/Herophobia/music/CreepyLaught.mp3" type="audio/mpeg">
+        <source src="music/CreepyLaught.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Основная структура -->
+    <header class="main-header">
+        <div class="title-container">
+            <h1 class="game-title">Herophobia</h1>
+            <h2 class="game-subtitle"><i>The Last Show Must Never End</i></h2>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="menu-container">
+            <nav class="main-menu">
+                <button class="menu-button start-button" onclick="startGame()">
+                    <span class="button-icon">🎪</span>
+                    <span class="button-text">Начать игру</span>
+                </button>
+                
+                <button class="menu-button gallery-button" onclick="openGallery()">
+                    <span class="button-icon">🎭</span>
+                    <span class="button-text">Галерея</span>
+                </button>
+                
+                <button class="menu-button achievements-button" onclick="openAchievements()">
+                    <span class="button-icon">🏆</span>
+                    <span class="button-text">Достижения</span>
+                </button>
+                
+                <button class="menu-button settings-button" onclick="openSettings()">
+                    <span class="button-icon">⚙️</span>
+                    <span class="button-text">Настройки</span>
+                </button>
+            </nav>
+        </div>
+    </main>
+
+    <!-- Оверлей с дисклеймером -->
+    <div class="overlay" id="disclaimerOverlay">
+        <div class="disclaimer" id="disclaimer">
+            <div class="disclaimer-content">
+                <h2>ПРЕДУПРЕЖДЕНИЕ</h2>
+                <p>Данная игра содержит сцены жестокости, психологического ужаса и элементы, которые могут вызвать дискомфорт у чувствительных зрителей.</p>
+                <p>В геймплее присутствует мигающий свет, резкие звуки и неожиданные пугающие моменты.</p>
+                <p>Не рекомендуется для лиц с нервными расстройствами, эпилепсией или сердечно-сосудистыми заболеваниями. А также лиц, младше 18 лет.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Окно настроек -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <button class="close-settings" onclick="closeSettings()">×</button>
+            <h2 class="settings-title">Настройки</h2>
+            
+            <div class="setting-group">
+                <label class="setting-label">Громкость:</label>
+                <div class="volume-slider-container">
+                    <input type="range" min="0" max="100" value="70" class="volume-slider" id="volumeSlider" oninput="changeVolume(this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переменные для управления звуком
+        let isAudioPlaying = false;
+        let audioInitialized = false;
+        let userInteraction = false;
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница загружена, инициализация звука...");
+            
+            // Загружаем сохраненные настройки
+            loadSettings();
+            
+            // Ждем взаимодействия пользователя для включения звука
+            document.addEventListener('click', function initAudio() {
+                if (!userInteraction) {
+                    userInteraction = true;
+                    console.log("Пользователь взаимодействовал, запускаем звук...");
+                    initializeAudio();
+                    document.removeEventListener('click', initAudio);
+                }
+            });
+        });
+
+        // Функция инициализации аудио
+        function initializeAudio() {
+            const mainTheme = document.getElementById('mainTheme');
+            
+            if (!audioInitialized) {
+                // Устанавливаем громкость из сохраненных настроек
+                const savedVolume = localStorage.getItem('herophobia_volume') || 70;
+                mainTheme.volume = savedVolume / 100;
+                
+                // Пытаемся воспроизвести музыку
+                const playPromise = mainTheme.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log("Музыка успешно запущена!");
+                        isAudioPlaying = true;
+                        audioInitialized = true;
+                    }).catch(error => {
+                        console.log("Ошибка воспроизведения музыки:", error);
+                    });
+                }
+            }
+        }
+
+        // Функция начала игры
+        function startGame() {
+            userInteraction = true;
+            const mainTheme = document.getElementById('mainTheme');
+            const overlay = document.getElementById('disclaimerOverlay');
+            const disclaimer = document.getElementById('disclaimer');
+            
+            // Сначала останавливаем музыку
+            if (!mainTheme.paused) {
+                mainTheme.pause();
+                isAudioPlaying = false;
+            }
+            
+            // Пробуем воспроизвести звук смеха
+            playLaughSound();
+            
+            // Показываем оверлей
+            overlay.style.display = 'flex';
+            
+            // Затемнение фона
+            setTimeout(() => {
+                overlay.style.background = 'rgba(0, 0, 0, 0.95)';
+            }, 100);
+            
+            // Показываем дисклеймер
+            setTimeout(() => {
+                disclaimer.style.opacity = '1';
+                disclaimer.style.transform = 'scale(1)';
+            }, 500);
+            
+            // Через 8 секунд переходим на страницу игры
+            setTimeout(() => {
+                disclaimer.style.opacity = '0';
+                disclaimer.style.transform = 'scale(0.9)';
+                
+                setTimeout(() => {
+                    overlay.style.background = 'rgba(0, 0, 0, 1)';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'game.html';
+                    }, 500);
+                }, 300);
+            }, 8000);
+        }
+
+        // Функция воспроизведения звука смеха
+        function playLaughSound() {
+            try {
+                const laughtSound = document.getElementById('laughtSound');
+                
+                // Сбрасываем звук на начало
+                laughtSound.currentTime = 0;
+                laughtSound.volume = 0.8;
+                
+                // Пытаемся воспроизвести
+                const playPromise = laughtSound.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Ошибка воспроизведения смеха:", error);
+                        
+                        // Пробуем альтернативный путь
+                        if (laughtSound.src.includes('Core/Herophobia/')) {
+                            laughtSound.src = 'music/CreepyLaught.mp3';
+                            laughtSound.play().catch(e => {
+                                console.log("Альтернативный путь не сработал:", e);
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log("Общая ошибка при воспроизведении звука смеха:", e);
+            }
+        }
+
+        // Функция открытия галереи
+        function openGallery() {
+            userInteraction = true;
+            // Останавливаем музыку
+            const mainTheme = document.getElementById('mainTheme');
+            mainTheme.pause();
+            isAudioPlaying = false;
+            
+            // Плавный переход
+            document.body.style.transition = 'opacity 0.6s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'Gallery.html';
+            }, 600);
+        }
+
+        // Функция открытия достижений
+        function openAchievements() {
+            userInteraction = true;
+            // Останавливаем музыку
+            const mainTheme = document.getElementById('mainTheme');
+            mainTheme.pause();
+            isAudioPlaying = false;
+            
+            // Плавный переход
+            document.body.style.transition = 'opacity 0.6s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'achievements.html';
+            }, 600);
+        }
+
+        // Функции для настроек
+        function openSettings() {
+            userInteraction = true;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function changeVolume(value) {
+            userInteraction = true;
+            const mainTheme = document.getElementById('mainTheme');
+            const volume = value / 100;
+            
+            if (audioInitialized) {
+                mainTheme.volume = volume;
+            }
+            
+            // Сохраняем настройки
+            localStorage.setItem('herophobia_volume', value);
+        }
+
+        function loadSettings() {
+            // Загружаем громкость
+            const savedVolume = localStorage.getItem('herophobia_volume');
+            if (savedVolume) {
+                const volumeSlider = document.getElementById('volumeSlider');
+                volumeSlider.value = savedVolume;
+            }
+        }
+
+        // Обработка ошибок аудио
+        document.getElementById('mainTheme').addEventListener('error', function() {
+            console.error('Ошибка загрузки основной темы. Проверьте пути к файлам.');
+        });
+
+        // Предотвращение контекстного меню и выделения
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+
+        // Автоматически запускаем музыку при первом клике пользователя
+        document.addEventListener('click', function() {
+            if (!userInteraction) {
+                userInteraction = true;
+                initializeAudio();
+            }
+        });
+    </script>
+</body>
+</html>
