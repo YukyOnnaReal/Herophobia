@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Цирковая Новелла</title>
+    <title>Herophobia. The preface</title>
     <style>
         * {
             margin: 0;
@@ -188,26 +188,45 @@
             transition: opacity 0.5s ease;
         }
 
-        /* Картинка персонажа прикована к нижней части справа */
-        .character-portrait {
+        /* НОВЫЙ КОНТЕЙНЕР ДЛЯ ПОРТРЕТА С РАМКОЙ */
+        .portrait-container {
             position: absolute;
-            bottom: 40px;
-            right: 60px;
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            background-color: #1a000a;
-            box-shadow: 0 0 20px rgba(80, 0, 20, 0.5);
-            z-index: 150;
+            bottom: 40px; /* Такая же позиция как у диалогового окна */
+            right: 60px; /* Отступ от правого края */
+            width: 200px; /* Ширина квадрата */
+            height: 25vh; /* Такая же высота как у диалогового окна */
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            border: 1px solid rgba(120, 0, 40, 0.8);
+            box-shadow: 
+                0 0 30px rgba(120, 0, 40, 0.5),
+                inset 0 0 20px rgba(80, 0, 20, 0.3);
+            border-radius: 10px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px; /* Отступ от краёв рамки */
             transition: opacity 0.5s ease;
         }
 
-        /* Диалоговое окно */
+        /* Картинка персонажа внутри рамки - центрированная */
+        .character-portrait {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain; /* Сохраняет пропорции PNG */
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Диалоговое окно - изменена ширина */
         .dialog-container {
             position: absolute;
             bottom: 40px;
             left: 60px;
-            width: calc(100% - 320px);
+            width: calc(100% - 340px); /* Уменьшена ширина на 20px + ширина портрета */
             height: 25vh;
             background: linear-gradient(135deg, 
                 rgba(60, 0, 20, 0.95), 
@@ -222,6 +241,7 @@
             border-radius: 10px;
             backdrop-filter: blur(5px);
             transition: all 0.5s ease;
+            margin-right: 20px; /* Отступ от портрета */
         }
 
         .dialog-container.fullscreen {
@@ -324,6 +344,44 @@
             z-index: 201;
         }
 
+        /* Кружочек в центре экрана над кнопками */
+        .center-indicator {
+            position: absolute;
+            top: calc(50% - 170px); /* Поднят выше кнопок */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, 
+                rgba(255, 0, 80, 0.8), 
+                rgba(180, 0, 40, 0.8));
+            border: 2px solid rgba(255, 100, 140, 0.9);
+            box-shadow: 
+                0 0 20px rgba(255, 0, 80, 0.6),
+                0 0 40px rgba(255, 0, 80, 0.4),
+                inset 0 0 10px rgba(255, 150, 180, 0.3);
+            z-index: 202;
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 
+                    0 0 15px rgba(255, 0, 80, 0.5),
+                    0 0 30px rgba(255, 0, 80, 0.3),
+                    inset 0 0 5px rgba(255, 150, 180, 0.2);
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            100% {
+                box-shadow: 
+                    0 0 25px rgba(255, 0, 80, 0.8),
+                    0 0 50px rgba(255, 0, 80, 0.5),
+                    inset 0 0 15px rgba(255, 150, 180, 0.4);
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
         /* Стили кнопок выбора */
         .circus-button {
             background: linear-gradient(145deg, 
@@ -377,10 +435,10 @@
             left: 100%;
         }
 
-        /* Кнопка "Идти внутрь" - ИЗМЕНЕНИЕ: центрирование */
+        /* Кнопка "Идти внутрь" - ПОДНЯТА ВЫШЕ НА 100px */
         .enter-button {
-            position: fixed; /* Изменено на fixed */
-            top: 50%;
+            position: absolute;
+            bottom: 350px; /* ПОДНЯТА ВЫШЕ */
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(145deg, 
@@ -402,10 +460,11 @@
             box-shadow: 
                 0 0 15px rgba(100, 0, 30, 0.4),
                 inset 0 0 10px rgba(60, 0, 15, 0.3);
-            z-index: 300; /* Увеличено для поверх всего */
+            z-index: 300;
             display: none;
             opacity: 0;
             animation: fadeInButton 0.8s ease forwards;
+            width: 300px;
         }
 
         @keyframes fadeInButton {
@@ -421,7 +480,7 @@
                 inset 0 0 15px rgba(80, 0, 25, 0.4);
         }
 
-        /* Экран с билетом */
+        /* Экран с билетом - ИСПРАВЛЕН */
         .ticket-screen {
             position: fixed;
             top: 0;
@@ -435,29 +494,41 @@
             z-index: 1000;
         }
 
-        .ticket-image {
+        /* Обновлённый контейнер для билета */
+        .ticket-container {
+            position: relative;
+            display: inline-block;
             max-width: 60%;
             max-height: 60%;
-            border-radius: 10px;
-            box-shadow: 
-                0 0 60px rgba(180, 140, 0, 0.6),
-                0 0 30px rgba(150, 100, 0, 0.4),
-                0 0 15px rgba(120, 80, 0, 0.3);
+        }
+
+        /* Улучшенное изображение билета */
+        .ticket-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: 
+                drop-shadow(0 0 20px rgba(180, 140, 0, 0.8))
+                drop-shadow(0 0 40px rgba(150, 100, 0, 0.6))
+                drop-shadow(0 0 60px rgba(120, 80, 0, 0.4));
             animation: ticketGlow 2s infinite alternate;
+            border-radius: 8px;
+            display: block;
+            background: transparent; /* Убрали чёрный фон */
         }
 
         @keyframes ticketGlow {
             0% {
-                box-shadow: 
-                    0 0 50px rgba(180, 140, 0, 0.5),
-                    0 0 25px rgba(150, 100, 0, 0.3),
-                    0 0 10px rgba(120, 80, 0, 0.2);
+                filter: 
+                    drop-shadow(0 0 15px rgba(180, 140, 0, 0.6))
+                    drop-shadow(0 0 30px rgba(150, 100, 0, 0.4))
+                    drop-shadow(0 0 45px rgba(120, 80, 0, 0.2));
             }
             100% {
-                box-shadow: 
-                    0 0 80px rgba(180, 140, 0, 0.8),
-                    0 0 40px rgba(150, 100, 0, 0.6),
-                    0 0 20px rgba(120, 80, 0, 0.4);
+                filter: 
+                    drop-shadow(0 0 25px rgba(180, 140, 0, 0.9))
+                    drop-shadow(0 0 50px rgba(150, 100, 0, 0.7))
+                    drop-shadow(0 0 75px rgba(120, 80, 0, 0.5));
             }
         }
 
@@ -478,12 +549,11 @@
         /* Адаптивность */
         @media (max-width: 1024px) {
             .dialog-container:not(.fullscreen) {
-                width: calc(100% - 280px);
+                width: calc(100% - 300px);
             }
             
-            .character-portrait {
+            .portrait-container {
                 width: 180px;
-                height: 180px;
             }
         }
 
@@ -495,11 +565,12 @@
                 max-width: 300px;
             }
             
-            .character-portrait {
+            .portrait-container {
                 width: 150px;
-                height: 150px;
+                height: 30vh;
                 right: 20px;
-                bottom: 30px;
+                bottom: 40px;
+                padding: 15px;
             }
             
             .dialog-container:not(.fullscreen) {
@@ -529,12 +600,18 @@
                 font-size: 1.2rem;
             }
             
+            .center-indicator {
+                top: calc(50% - 160px);
+                width: 35px;
+                height: 35px;
+            }
+            
             .enter-button {
                 font-size: 1.2rem;
                 padding: 12px 30px;
             }
             
-            .ticket-image {
+            .ticket-container {
                 max-width: 80%;
                 max-height: 80%;
             }
@@ -547,9 +624,10 @@
                 max-width: 250px;
             }
             
-            .character-portrait {
+            .portrait-container {
                 width: 120px;
-                height: 120px;
+                height: 35vh;
+                padding: 10px;
             }
             
             .dialog-container:not(.fullscreen) {
@@ -577,12 +655,18 @@
                 padding: 10px 25px;
             }
             
+            .center-indicator {
+                top: calc(50% - 150px);
+                width: 30px;
+                height: 30px;
+            }
+            
             .enter-button {
                 font-size: 1.1rem;
                 padding: 10px 30px;
             }
             
-            .ticket-image {
+            .ticket-container {
                 max-width: 90%;
                 max-height: 90%;
             }
@@ -598,8 +682,11 @@
         <!-- Имя персонажа слева -->
         <div id="character-name" class="character-name"></div>
         
-        <!-- Картинка персонажа справа внизу -->
-        <img id="character-portrait" class="character-portrait" src="" alt="Персонаж">
+        <!-- Контейнер для портрета с рамкой -->
+        <div id="portrait-container" class="portrait-container">
+            <!-- Картинка персонажа внутри рамки -->
+            <img id="character-portrait" class="character-portrait" src="" alt="Персонаж">
+        </div>
         
         <!-- Диалоговое окно -->
         <div class="dialog-container" id="dialog-container">
@@ -610,11 +697,12 @@
         </div>
     </div>
 
-    <!-- Кнопка "Идти внутрь" - ИЗМЕНЕНИЕ: вынесена из контейнера -->
+    <!-- Кнопка "Идти внутрь" - ПОДНЯТА ВЫШЕ -->
     <button class="enter-button" id="enter-button" onclick="enterCircus()">Идти внутрь</button>
 
     <!-- Финальный экран с выбором -->
     <div class="final-screen" id="final-screen" style="background-image: url('arts/CircusOut.jpeg');">
+        
         <div class="choice-buttons">
             <button class="circus-button" onclick="chooseCircus()">Отправиться в цирк</button>
             <button class="circus-button" onclick="goHome()">Пойти домой</button>
@@ -623,7 +711,9 @@
 
     <!-- Экран с билетом -->
     <div class="ticket-screen" id="ticket-screen">
-        <img src="arts/Ticket.png" alt="Билет" class="ticket-image">
+        <div class="ticket-container">
+            <img src="arts/Ticket.png" alt="Билет" class="ticket-image">
+        </div>
     </div>
 
     <!-- Переход между сценами -->
@@ -1248,9 +1338,10 @@
                 characterName: "???",
                 text: "Возьми. Он уже заждался тебя... В зале приготовлено особое место...",
                 isNarrator: false,
-                effect: 'distorted'
+                effect: 'distorted',
+                waitForTicket: true // Флаг, что после этой фразы нужно ждать нажатия для показа билета
             },
-            // После этой фразы показываем билет
+            // После показа билета продолжаем с этих сцен
             {
                 background: "url('arts/Ticketsell.jpg')",
                 characterImage: "arts/ref.png",
@@ -1316,11 +1407,14 @@
             canAdvance: true,
             musicPlaying: false,
             ticketShown: false,
-            showEnterButton: false
+            showEnterButton: false,
+            isShowingTicket: false, // Новый флаг для отслеживания показа билета
+            waitingForTicket: false // Новый флаг: ждём нажатия для показа билета
         };
 
         // Элементы DOM
         const sceneContainer = document.getElementById('scene-container');
+        const portraitContainer = document.getElementById('portrait-container');
         const characterPortrait = document.getElementById('character-portrait');
         const characterName = document.getElementById('character-name');
         const dialogText = document.getElementById('dialog-text');
@@ -1365,21 +1459,21 @@
             
             if (!scene) return;
             
-            // Если нужно показать кнопку "Идти внутрь", скрываем диалоговое окно
+            // Если нужно показать кнопку "Идти внутрь", скрываем диалоговое окно и рамку
             if (gameState.showEnterButton) {
                 dialogContainer.style.opacity = '0';
+                portraitContainer.style.opacity = '0';
                 characterName.style.opacity = '0';
-                characterPortrait.style.opacity = '0';
                 return;
             }
             
-            // Восстанавливаем видимость диалогового окна
+            // Восстанавливаем видимость диалогового окна и рамки
             dialogContainer.style.opacity = '1';
             
             sceneContainer.style.backgroundImage = scene.background;
             
             if (scene.isNarrator) {
-                characterPortrait.style.opacity = '0';
+                portraitContainer.style.opacity = '0';
                 characterName.style.opacity = '0';
                 dialogContainer.classList.add('fullscreen');
                 dialogText.classList.add('narrator');
@@ -1387,10 +1481,18 @@
                 
                 applyTextEffect(scene.effect);
             } else {
-                characterPortrait.src = scene.characterImage;
-                characterPortrait.alt = scene.characterName;
-                characterPortrait.style.opacity = '1';
+                portraitContainer.style.opacity = '1';
                 characterName.style.opacity = '1';
+                
+                // Загружаем изображение персонажа
+                if (scene.characterImage) {
+                    characterPortrait.src = scene.characterImage;
+                    characterPortrait.alt = scene.characterName;
+                    characterPortrait.style.display = 'block';
+                } else {
+                    characterPortrait.style.display = 'none';
+                }
+                
                 dialogContainer.classList.remove('fullscreen');
                 dialogText.classList.remove('narrator');
                 dialogText.classList.add('normal');
@@ -1411,14 +1513,8 @@
                 stopLetterMutation();
             }
             
-            // Специальная логика для показа билета
-            if (gameState.currentPhase === 'circus' && gameState.currentScene === 12) {
-                // Это сцена с фразой "Возьми. Он уже заждался тебя..."
-                // Через короткую задержку показываем билет
-                setTimeout(() => {
-                    showTicket();
-                }, 1000);
-            }
+            // Проверяем, нужно ли ждать нажатия для показа билета
+            gameState.waitingForTicket = scene.waitForTicket || false;
             
             // Показываем кнопку входа после завершения всех диалогов цирка
             if (gameState.currentPhase === 'circus' && gameState.currentScene === scenes.length - 1) {
@@ -1434,10 +1530,10 @@
             gameState.showEnterButton = true;
             gameState.canAdvance = false;
             
-            // Плавно скрываем диалоговое окно
+            // Плавно скрываем диалоговое окно и рамку
             dialogContainer.style.opacity = '0';
+            portraitContainer.style.opacity = '0';
             characterName.style.opacity = '0';
-            characterPortrait.style.opacity = '0';
             
             // Показываем кнопку
             enterButton.style.display = 'block';
@@ -1450,10 +1546,11 @@
 
         // Показать билет
         function showTicket() {
-            if (gameState.ticketShown) return;
+            if (gameState.ticketShown || gameState.isShowingTicket) return;
             
-            gameState.ticketShown = true;
+            gameState.isShowingTicket = true;
             gameState.canAdvance = false;
+            gameState.waitingForTicket = false;
             
             fadeOut();
             
@@ -1466,10 +1563,12 @@
                     fadeOut();
                     setTimeout(() => {
                         ticketScreen.style.display = 'none';
+                        gameState.isShowingTicket = false;
+                        gameState.ticketShown = true;
                         gameState.canAdvance = true;
                         fadeIn();
                         
-                        // Переходим к следующей сцене
+                        // Переходим к следующей сцене (после сцены с ожиданием билета)
                         nextScene();
                     }, 2000);
                 }, 5000);
@@ -1593,6 +1692,16 @@
 
         // Переход к следующей сцене
         function nextScene() {
+            // Если сейчас показывается билет, не позволяем переходить
+            if (gameState.isShowingTicket) return;
+            
+            // Если ждём нажатия для показа билета, показываем его
+            if (gameState.waitingForTicket) {
+                showTicket();
+                return;
+            }
+            
+            // Обычная логика перехода
             if (!gameState.canAdvance) return;
             
             const scenes = getCurrentScenes();
@@ -1630,6 +1739,8 @@
                 gameState.currentScene = 0;
                 gameState.ticketShown = false;
                 gameState.showEnterButton = false;
+                gameState.isShowingTicket = false;
+                gameState.waitingForTicket = false;
                 sceneContainer.style.opacity = '1';
                 updateScene();
                 fadeIn();
@@ -1654,7 +1765,13 @@
 
         // Обработка нажатия пробела
         document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space' && gameState.canAdvance && !gameState.showEnterButton) {
+            // Если показывается билет, блокируем все нажатия
+            if (gameState.isShowingTicket) {
+                event.preventDefault();
+                return;
+            }
+            
+            if (event.code === 'Space') {
                 event.preventDefault();
                 nextScene();
             }
@@ -1662,6 +1779,9 @@
 
         // Клик для перехода
         document.addEventListener('click', function(event) {
+            // Если показывается билет, блокируем все клики
+            if (gameState.isShowingTicket) return;
+            
             if (!gameState.canAdvance) return;
             
             if (!event.target.closest('.enter-button') && 
@@ -1679,7 +1799,7 @@
 
         // Обработка ошибок загрузки изображений
         characterPortrait.onerror = function() {
-            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiPuKEoiA8L3RleHQ+PC9zdmc+';
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlгаHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiPuKEoiA8L3RleHQ+PC9zdmc+';
             this.alt = "Изображение не найдено";
         };
     </script>

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herophobia: Secret Ending</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+            cursor: default;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        /* Анимация появления из черного */
+        #fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            animation: fadeIn 3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* Контейнер сцены */
+        .scene-container {
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1.2s ease;
+            position: relative;
+        }
+
+        /* Диалоговое окно */
+        .dialog-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 25vh;
+            background: linear-gradient(135deg, 
+                rgba(60, 0, 20, 0.95), 
+                rgba(40, 0, 10, 0.95));
+            border: 1px solid rgba(120, 0, 40, 0.8);
+            box-shadow: 
+                0 0 30px rgba(120, 0, 40, 0.5),
+                inset 0 0 20px rgba(80, 0, 20, 0.3);
+            z-index: 100;
+            display: flex;
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            transition: all 0.5s ease;
+        }
+
+        /* Правая часть с текстом */
+        .dialog-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Стиль текста для авторских реплик */
+        .dialog-text {
+            font-size: 1.8rem;
+            line-height: 1.8;
+            text-align: center;
+            padding: 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #ffd9e3;
+            text-shadow: 0 0 10px rgba(255, 200, 220, 0.3);
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+
+        .continue-indicator {
+            text-align: center;
+            color: #ffb3c1;
+            font-size: 1.1rem;
+            font-style: italic;
+            text-shadow: 0 0 5px rgba(200, 100, 120, 0.3);
+            animation: pulse 1.5s infinite alternate;
+            padding: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Переход между сценами */
+        .scene-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 10000;
+            transition: opacity 1s ease;
+        }
+
+        /* Стили для экрана с новостями - УМЕНЬШЕННЫЙ РАЗМЕР */
+        .news-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .news-container {
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 5px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        /* Эффект старения бумаги */
+        .news-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.03) 100%),
+                linear-gradient(rgba(0,0,0,0.02) 50%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Эффект пятен на бумаге */
+        .news-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0,0,0,0.05) 2px, transparent 3px),
+                radial-gradient(circle at 90% 70%, rgba(0,0,0,0.04) 2px, transparent 3px),
+                radial-gradient(circle at 30% 80%, rgba(0,0,0,0.03) 2px, transparent 3px);
+            background-size: 200px 200px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .news-title {
+            color: #000000;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .news-subtitle {
+            color: #222222;
+            font-size: 1.3rem;
+            margin: 15px 0 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .news-text {
+            color: #222222;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .news-highlight {
+            color: #000000;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* Стиль для номера телефона с глитч-эффектом */
+        .phone-number {
+            display: inline-block;
+            color: #000000;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 2px 8px;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .news-footer {
+            color: #555555;
+            font-size: 0.9rem;
+            text-align: right;
+            margin-top: 20px;
+            font-style: italic;
+            border-top: 1px solid #999999;
+            padding-top: 10px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .dialog-container {
+                width: 90%;
+                height: 30vh;
+                padding: 15px;
+            }
+            
+            .dialog-text {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            .continue-indicator {
+                font-size: 1rem;
+            }
+            
+            .news-container {
+                width: 95%;
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            .news-title {
+                font-size: 1.6rem;
+                margin-bottom: 15px;
+            }
+            
+            .news-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .news-text {
+                font-size: 0.95rem;
+                line-height: 1.4;
+                margin-bottom: 12px;
+            }
+            
+            .news-footer {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dialog-container {
+                height: 35vh;
+                padding: 12px;
+            }
+            
+            .dialog-text {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+            
+            .continue-indicator {
+                font-size: 0.9rem;
+            }
+            
+            .news-container {
+                width: 98%;
+                padding: 15px;
+                max-height: 80vh;
+            }
+            
+            .news-title {
+                font-size: 1.4rem;
+                padding-bottom: 8px;
+            }
+            
+            .news-subtitle {
+                font-size: 1rem;
+            }
+            
+            .news-text {
+                font-size: 0.85rem;
+                line-height: 1.3;
+                margin-bottom: 10px;
+            }
+            
+            .news-footer {
+                font-size: 0.75rem;
+                margin-top: 15px;
+            }
+        }
+
+        /* Для очень маленьких экранов */
+        @media (max-height: 600px) {
+            .news-container {
+                max-height: 75vh;
+                padding: 15px;
+            }
+            
+            .news-title {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+            
+            .news-text {
+                font-size: 0.8rem;
+                line-height: 1.2;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Начальное затемнение -->
+    <div id="fade-overlay"></div>
+    
+    <!-- Контейнер сцены -->
+    <div class="scene-container" id="scene-container">
+        <!-- Диалоговое окно -->
+        <div class="dialog-container" id="dialog-container">
+            <div class="dialog-panel">
+                <div id="dialog-text" class="dialog-text"></div>
+                <div class="continue-indicator">Нажмите ПРОБЕЛ для продолжения...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран с новостями -->
+    <div class="news-screen" id="news-screen">
+        <div class="news-container">
+            <div class="news-title">НОВОСТИ ГОРОДА</div>
+            <div class="news-subtitle">ЭКСТРЕННОЕ СООБЩЕНИЕ</div>
+            <div class="news-text">
+                За последнюю неделю в нашем городе произошла серия тревожных событий. 
+                Таинственный цирк <span class="news-highlight">"The House of Silent Wonders"</span>, 
+                неожиданно появившийся на пустыре у старой реки, так же внезапно исчез, 
+                оставив после себя лишь пустой участок земли и множество вопросов
+            </div>
+            <div class="news-text">
+                По данным полиции, за время пребывания цирка в городе 
+                <span class="news-highlight">без вести пропало 7 человек</span>. 
+                Все они были замечены в районе пустыря в разное время. 
+                Родственники пропавших сообщают, что их близкие проявляли 
+                повышенный интерес к афишам цирка
+            </div>
+            <div class="news-text">
+                Свидетели описывают странное поведение персонала цирка и 
+                "нездоровую" атмосферу вокруг шатра. Несколько человек 
+                пытались предупредить других об опасности, но их словам 
+                не придали значения
+            </div>
+            <div class="news-text">
+                Полиция проводит расследование, однако каких-либо зацепок 
+                пока не обнаружено. Цирковая труппа бесследно исчезла, 
+                не оставив следов своего пребывания. Если вы знаете какую-то информацию,
+                сообщите нам по телефону <span id="phone-number" class="phone-number">8-457-102-011-254</span>
+            </div>
+            <div class="news-footer">Газета "Городские Вести", специальный выпуск</div>
+        </div>
+    </div>
+
+    <!-- Переход между сценами -->
+    <div class="scene-transition" id="scene-transition"></div>
+
+    <!-- Аудио для фоновой музыки -->
+    <audio id="background-music" loop preload="auto">
+        <source src="music/Do Your Choice.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+
+    <script>
+        // Данные концовки (без эффектов и задержек)
+        const endingScenes = [
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                text: "Я стоял перед огромным красно-белым шатром. Что-то сжимало моё сердце изнутри..."
+            },
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                text: "Это было не просто беспокойство. Это был первобытный страх, шептавший мне на ухо: «Беги»"
+            },
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                text: "Я посмотрел на шатёр ещё раз. Он будто дышал в такт ветру, его полосатые стены колыхались, словно ребра какого-то огромного зверя..."
+            },
+            {
+                background: "url('arts/CircusOut.jpeg')",
+                text: "Нет. Просто нет"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "Я развернулся и почти бегом помчался прочь. Ноги сами несли меня домой"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "Заперев дверь на все замки, я рухнул на кровать. Сердце колотилось как бешеное"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "«Там не на что смотреть», — пытался убедить я себя. Но знал, что это ложь"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "Там было что-то не так. Что-то глубоко, фундаментально неправильное"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "На следующее утро я снова пошёл к пустырю"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "Шатёр всё ещё стоял. Но казался ещё более мрачным, чем вчера"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "Я видел, как люди подходили к кассе, покупали билеты, исчезали внутри..."
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "И не видел, чтобы кто-то выходил"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "На седьмой день я пришёл снова. Пустырь был пуст"
+            },
+            {
+                background: "url('arts/Outside.jpg')",
+                text: "Цирк исчез. Словно его и не было. Ни следа, ни мусора, ничего"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "Только странное ощущение пустоты в том месте, где он стоял"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "И тишина. Глухая, гнетущая тишина"
+            },
+            {
+                background: "url('arts/room.jpg')",
+                text: "А на следующее утро в ежедневной газете я увидел жуткий заголовок..."
+            }
+        ];
+
+        // Состояние игры
+        let gameState = {
+            currentScene: 0,
+            canAdvance: true,
+            musicPlaying: false,
+            newsShown: false,
+            endingComplete: false
+        };
+
+        // Переменная для глитч-эффекта телефона
+        let phoneMutationInterval = null;
+
+        // Элементы DOM
+        const sceneContainer = document.getElementById('scene-container');
+        const dialogText = document.getElementById('dialog-text');
+        const dialogContainer = document.getElementById('dialog-container');
+        const sceneTransition = document.getElementById('scene-transition');
+        const backgroundMusic = document.getElementById('background-music');
+        const newsScreen = document.getElementById('news-screen');
+        const phoneNumberElement = document.getElementById('phone-number');
+        const fadeOverlay = document.getElementById('fade-overlay');
+
+        // Инициализация первой сцены
+        function initializeScene() {
+            updateScene();
+            startMusic();
+        }
+
+        // Начать воспроизведение музыки
+        function startMusic() {
+            try {
+                backgroundMusic.volume = 0.4;
+                const playPromise = backgroundMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        gameState.musicPlaying = true;
+                    }).catch(error => {
+                        console.log("Ошибка воспроизведения музыки:", error);
+                    });
+                }
+            } catch (e) {
+                console.log("Ошибка при запуске музыки:", e);
+            }
+        }
+
+        // Обновление сцены
+        function updateScene() {
+            const scene = endingScenes[gameState.currentScene];
+            
+            if (!scene) {
+                showNews();
+                return;
+            }
+            
+            sceneContainer.style.backgroundImage = scene.background;
+            dialogText.textContent = scene.text;
+        }
+
+        // Глитч-эффект для номера телефона (только цифры)
+        function startPhoneGlitch() {
+            if (phoneMutationInterval) {
+                clearInterval(phoneMutationInterval);
+            }
+            
+            const originalPhone = "8-457-102-011-254";
+            phoneMutationInterval = setInterval(() => {
+                let newPhone = "";
+                
+                for (let i = 0; i < originalPhone.length; i++) {
+                    const char = originalPhone[i];
+                    
+                    // Применяем глитч только к цифрам
+                    if (char >= '0' && char <= '9') {
+                        if (Math.random() > 0.7) { // 30% шанс на глитч
+                            // Заменяем цифры на случайные
+                            const glitched = Math.floor(Math.random() * 10).toString();
+                            newPhone += glitched;
+                        } else {
+                            newPhone += char;
+                        }
+                    } else {
+                        newPhone += char; // Сохраняем дефисы
+                    }
+                }
+                
+                phoneNumberElement.textContent = newPhone;
+                
+                // Редкое изменение цвета (10% шанс)
+                if (Math.random() > 0.9) {
+                    phoneNumberElement.style.color = '#ff0000';
+                    setTimeout(() => {
+                        phoneNumberElement.style.color = '#000000';
+                    }, 50);
+                }
+                
+            }, 50); // Быстрый глитч каждые 50мс
+        }
+
+        // Показать экран с новостями
+        function showNews() {
+            if (gameState.newsShown) return;
+            
+            gameState.newsShown = true;
+            gameState.canAdvance = false;
+            
+            fadeOut();
+            
+            setTimeout(() => {
+                // Скрываем диалоговое окно
+                dialogContainer.style.opacity = '0';
+                
+                // Показываем новости
+                newsScreen.style.display = 'flex';
+                
+                // Запускаем глитч-эффект для номера телефона
+                startPhoneGlitch();
+                
+                fadeIn();
+                
+                // Сразу показываем индикатор продолжения
+                gameState.canAdvance = true;
+                document.querySelector('.continue-indicator').style.opacity = '1';
+                document.querySelector('.continue-indicator').textContent = "Нажмите ПРОБЕЛ для возврата в меню...";
+            }, 1000);
+        }
+
+        // Завершить концовку и вернуться в меню
+        function completeEnding() {
+            if (gameState.endingComplete) return;
+            
+            gameState.endingComplete = true;
+            gameState.canAdvance = false;
+            
+            // Останавливаем глитч-эффект
+            if (phoneMutationInterval) {
+                clearInterval(phoneMutationInterval);
+            }
+            
+            fadeOut();
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+
+        // Функция затемнения экрана
+        function fadeOut() {
+            sceneTransition.style.visibility = 'visible';
+            sceneTransition.style.opacity = '1';
+        }
+
+        // Функция осветления экрана
+        function fadeIn() {
+            sceneTransition.style.opacity = '0';
+            setTimeout(() => {
+                sceneTransition.style.visibility = 'hidden';
+            }, 1000);
+        }
+
+        // Переход к следующей сцене (немедленный при нажатии)
+        function nextScene() {
+            if (!gameState.canAdvance) return;
+            
+            if (gameState.currentScene < endingScenes.length - 1) {
+                gameState.currentScene++;
+                updateScene();
+            } else {
+                if (!gameState.newsShown) {
+                    showNews();
+                } else {
+                    completeEnding();
+                }
+            }
+        }
+
+        // Обработка нажатия пробела (без задержек)
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && gameState.canAdvance) {
+                event.preventDefault();
+                nextScene();
+            }
+        });
+
+        // Клик для перехода (без задержек)
+        document.addEventListener('click', function(event) {
+            if (gameState.canAdvance) {
+                nextScene();
+            }
+        });
+
+        // Инициализация при загрузке страницы
+        window.addEventListener('load', function() {
+            setTimeout(initializeScene, 1000);
+        });
+
+        // Обработка ошибок загрузки изображений
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            img.onerror = function() {
+                this.style.display = 'none';
+            };
+        });
+    </script>
+</body>
+</html>
